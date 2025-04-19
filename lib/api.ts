@@ -112,6 +112,14 @@ export const apiService = {
       api.post(`/vehicles/${vehicleLicensePlate}/services/${serviceId}/items`, itemData),
   },
 
+  items: {
+    getAll: (company:number) => api.get(`/companies/${company}items`),
+    getById: (company:number,id: number) => api.get(`/companies/${company}items/${id}`),
+    delete: (company:number,id: number) => api.delete(`/companies/${company}items/${id}`),
+    create: (company:number,itemData: any) => api.post(`/companies/${company}items`, itemData),
+    update: (company:number,id: number, itemData: any) => api.put(`/companies/${company}items/${id}`, itemData),
+  },
+
   // Brand related API calls
   brands: {
     getAll: () => api.get("/brands"),
