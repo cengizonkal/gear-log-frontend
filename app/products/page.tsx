@@ -27,6 +27,8 @@ interface ItemProps {
   name: string
   description: string | null
   default_price: string
+
+
 }
 
 export default function ProductsPage() {
