@@ -143,6 +143,11 @@ export function SearchResults({ vehicle }: { vehicle: VehicleWithDetailsProps })
             <p className="text-center text-muted-foreground py-4">Bu araç için servis kaydı bulunmamaktadır.</p>
           )}
         </CardContent>
+        <Button asChild className="w-full sm:w-auto ml-4 mb-4">
+            <Link href={`/vehicles/${vehicle.license_plate}/services`}>
+              Tümünü Görüntüle
+            </Link>
+          </Button>
       </Card>
     </div>
   )

@@ -71,7 +71,8 @@ export const apiService = {
 
     getById: (licensePlate: string) => api.get(`/vehicles/${licensePlate}`),
 
-    getServices: (licensePlate: string) => api.get(`/vehicles/${licensePlate}/services`),
+    getServices: (licensePlate: string, page: number = 1, per_page: number = 10) =>
+      api.get(`/vehicles/${licensePlate}/services`, { params: { page, per_page } }),
 
     getServiceById: (licensePlate: string, serviceId: number) =>
       api.get(`/vehicles/${licensePlate}/services/${serviceId}`),
