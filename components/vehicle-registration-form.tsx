@@ -25,6 +25,11 @@ interface Brand {
   }>
 }
 
+interface FuelType {
+  id: number
+  name: string
+}
+
 const formSchema = z.object({
   // Araç bilgileri
   licensePlate: z.string().min(5, {
@@ -68,6 +73,7 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [brands, setBrands] = useState<Brand[]>([])
+  const [fuelTypes, setFuelTypes] = useState<FuelType[]>([])
   const [selectedBrand, setSelectedBrand] = useState<string>("")
   const [models, setModels] = useState<Brand["models"]>([])
 
@@ -97,6 +103,18 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
     }
 
     fetchBrands()
+  }, [])
+
+  useEffect(() => {
+    const fuelTypes = async () => {
+      try {
+        const response = await apiService.fuelTypes.getAll()
+        setFuelTypes(response.data.data)
+      } catch (err) {
+        console.error("Failed to fetch fuel types:", err)
+      }
+    }
+    fuelTypes()
   }, [])
 
   useEffect(() => {
@@ -253,11 +271,11 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="benzin">Benzin</SelectItem>
-                      <SelectItem value="dizel">Dizel</SelectItem>
-                      <SelectItem value="lpg">LPG</SelectItem>
-                      <SelectItem value="elektrik">Elektrik</SelectItem>
-                      <SelectItem value="hibrit">Hibrit</SelectItem>
+                      {fuelTypes.map((fuelType) => (
+                      <SelectItem key={fuelType.id} value={fuelType.name}>
+                      {fuelType.name}
+                      </SelectItem>
+                    ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

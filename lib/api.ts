@@ -125,6 +125,11 @@ export const apiService = {
     getAll: () => api.get("/brands"),
   },
 
+  // Fuel type related API calls
+  fuelTypes: {
+    getAll: () => api.get("/fuel-types"),
+  },
+
   // Company related API calls
   companies: {
     getById: (id: number) => api.get(`/companies/${id}`),
