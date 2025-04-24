@@ -1,6 +1,6 @@
 "use client"
 
-import { Car, Home, LogOut, Package, Search, Settings, PenToolIcon as Tool, User, Wrench } from "lucide-react"
+import { Car, Home, LogOut, Package, Search, FileText, Settings, PenToolIcon as Tool, User, Wrench } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
@@ -87,6 +87,14 @@ export function AppSidebar() {
               <Link href="/products">
                 <Package className="h-5 w-5" />
                 <span>Ürünler</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive("/reports")}>
+              <Link href="/reports">
+                <FileText className="h-5 w-5" />
+                <span>Raporlar</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
