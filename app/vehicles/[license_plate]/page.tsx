@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Plus, Loader2 } from 'lucide-react';
-import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from "@/components/ui/label"
@@ -18,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { NewServiceForm } from "@/components/new-service-form"
+import { NewServiceForm } from "@/components/new-service-form";
 
 interface ServiceProps {
   id: number;
@@ -54,7 +53,6 @@ export default function VehicleDetailPage({ params }: Props) {
   const [vehicle, setVehicle] = useState<VehicleProps | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchVehicle = async () => {
     setLoading(true);
@@ -128,7 +126,6 @@ const handleOwnerUpdate = async () => {
   }
 
   const handleNewServiceSuccess = () => {
-    setIsModalOpen(false);
     setVehicle(null)
     setError(null)
     fetchVehicle();
@@ -241,9 +238,9 @@ const handleOwnerUpdate = async () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/services/${service.id}`}>
+                          <a href={`/services/${service.id}`}>
                             <Eye className="h-4 w-4" />
-                            <span className="sr-only">Görüntüle</span>
+                           <span className="sr-only">Görüntüle</span>
                           </Link>
                         </Button>
                       </TableCell>
@@ -263,18 +260,16 @@ const handleOwnerUpdate = async () => {
               Tümünü Görüntüle
             </Link>
           </Button>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                    Yeni Servis Ekle
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                  <NewServiceForm vehicleLicensePlate={vehicle.license_plate} onSuccess={handleNewServiceSuccess}/>
-              </DialogContent>
-            </Dialog>
-            <Link href={`/services/new?vehicle=${vehicle.license_plate}`}>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" /> Yeni Servis Ekle
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <NewServiceForm vehicleLicensePlate={vehicle.license_plate} onSuccess={handleNewServiceSuccess} />
+            </DialogContent>
+          </Dialog>
               <Plus className="mr-2 h-4 w-4" />
               Yeni Servis Ekle
             </Link>
