@@ -16,31 +16,30 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null)
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!licensePlate.trim()) {
-      setError("Lütfen bir plaka giriniz")
-      return
+      setError("Lütfen bir plaka giriniz");
+      return;
     }
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await apiService.vehicles.getById(licensePlate)
+      const response = await apiService.vehicles.getById(licensePlate);
       window.location.href = `/vehicles/${licensePlate}`;
     } catch (err: any) {
-      console.error("Search error:", err)
+      console.error("Search error:", err);
       if (err.response?.status === 404) {
-       window.location.href = `/vehicles/new?license_plate=${licensePlate}`;
-         } else {
-        setError("Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.")
+        window.location.href = `/vehicles/new?license_plate=${licensePlate}`;
+      } else {
+        setError("Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.");
       }
-      setSearchResults(null)
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">

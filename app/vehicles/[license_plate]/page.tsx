@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react';
+import React from "react";
 import { apiService } from '@/lib/api';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { NewServiceForm } from "@/components/new-service-form";
+import Link from 'next/link';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { OwnerDetails } from '@/components/owner-details';
+import { VehicleDetails } from '@/components/vehicle-details';
 
 interface ServiceProps {
   id: number;
@@ -49,7 +54,7 @@ interface Props {
 }
 
 export default function VehicleDetailPage({ params }: Props) {
-  const { license_plate } = params;
+  const { license_plate } = React.use(params);
   const [vehicle, setVehicle] = useState<VehicleProps | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,44 +79,11 @@ export default function VehicleDetailPage({ params }: Props) {
     }
   }, [license_plate]);
 
-  const [ownerName, setOwnerName] = useState('');
-  const [ownerPhone, setOwnerPhone] = useState('');
-  const [ownerEmail, setOwnerEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (vehicle?.owner) {
-        setOwnerName(vehicle.owner.name);
-        setOwnerPhone(vehicle.owner.phone);
-        setOwnerEmail(vehicle.owner.email);
-    }
-}, [vehicle]);
-const handleOwnerUpdate = async () => {
-  if (vehicle?.owner) {
-    try {
-      await apiService.owners.update(vehicle.owner.id, {
-        name: ownerName,
-        phone: ownerPhone,
-        email: ownerEmail,
-      });
-      // Optionally, refetch the vehicle data to update the UI with the latest data
-      setError(null)
-      fetchVehicle();
-    } catch (error) {
-      console.error("Error updating owner:", error);
-      if (error instanceof Error) {
-        setError(error.message);
-      } else if (typeof error === 'string') {
-        setError(error);
-      } else if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
-        setError(error.message)
-      } else if (typeof error === 'object' && error !== null && 'response' in error && typeof error.response === 'object' && error.response !== null && 'data' in error.response && typeof error.response.data === 'object' && error.response.data !== null && 'message' in error.response.data && typeof error.response.data.message === 'string') {
-        setError(error.response.data.message)
-      }
-
-      setError("Failed to update owner information.");
-    }
+  const handleNewServiceSuccess = () => {
+    setVehicle(null)
+    setError(null)
+    fetchVehicle();
   }
-};
 
   if (loading) {
     return (
@@ -123,12 +95,6 @@ const handleOwnerUpdate = async () => {
         </div>
       )
     
-  }
-
-  const handleNewServiceSuccess = () => {
-    setVehicle(null)
-    setError(null)
-    fetchVehicle();
   }
 
   if (error) {
@@ -161,119 +127,83 @@ const handleOwnerUpdate = async () => {
           <CardDescription>Plaka: {vehicle.license_plate}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-sm font-medium">Araç Detayları</h3>
-              <div className="mt-2 space-y-2">
-                <div className="grid grid-cols-2">
-                  <span className="text-sm text-muted-foreground">Marka/Model:</span>
-                  <span className="text-sm">
-                    {vehicle.brand} {vehicle.vehicle_model}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2">
-                  <span className="text-sm text-muted-foreground">Kilometre:</span>
-                  <span className="text-sm">{vehicle.mileage ? `${vehicle.mileage} km` : '-'}</span>
-                </div>
-                <div className="grid grid-cols-2">
-                  <span className="text-sm text-muted-foreground">Yakıt Tipi:</span>
-                  <span className="text-sm">{vehicle.fuel_type}</span>
-                </div>
-                <div className="grid grid-cols-2">
-                  <span className="text-sm text-muted-foreground">VIN:</span>
-                  <span className="text-sm">{vehicle.vin || '-'}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium">Araç Sahibi</h3>
-              <div className="mt-2 space-y-2">
-                <div className="grid grid-cols-2">
-                <Label htmlFor="name" className="text-sm text-muted-foreground">İsim:</Label>
-                <Input type="text" id="name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-2">
-                <Label htmlFor="phone" className="text-sm text-muted-foreground">Telefon:</Label>
-                <Input type="text" id="phone" value={ownerPhone} onChange={(e) => setOwnerPhone(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-2">
-                <Label htmlFor="email" className="text-sm text-muted-foreground">E-posta:</Label>
-                <Input type="email" id="email" value={ownerEmail || ''} onChange={(e) => setOwnerEmail(e.target.value)} />
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <VehicleDetails 
+              vehicle={vehicle} 
+              onVehicleUpdate={updatedVehicle => setVehicle((prev) => ({ ...prev, ...updatedVehicle }))} 
+            />
+            <OwnerDetails 
+              owner={vehicle.owner} 
+              onOwnerUpdate={updatedOwner => setVehicle((prev) => ({ ...prev, owner: updatedOwner }))} 
+            />
           </div>
         </CardContent>
-        <Button onClick={handleOwnerUpdate}>Kaydet</Button>
       </Card>
-    {vehicle.services && (
-      <Card>
-        <CardHeader>
-          <CardTitle>Son 5 Servis Kaydı</CardTitle>
-          <CardDescription>Araç için yapılan son 5 servis kaydı</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {vehicle.services && vehicle.services.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Servis No</TableHead>
-                    <TableHead>Başlangıç</TableHead>
-                    <TableHead className="hidden md:table-cell">Bitiş</TableHead>
-                    <TableHead>Durum</TableHead>
-                    <TableHead className="text-right">İşlem</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {vehicle.services.slice(-5).map((service) => (
-                    <TableRow key={service.id}>
-                      <TableCell className="font-medium">#{service.id}</TableCell>
-                      <TableCell>{formatDate(service.started_at)}</TableCell>
-                      <TableCell className="hidden md:table-cell">{formatDate(service.finished_at)}</TableCell>
-                      <TableCell>
-                        <Badge variant={service.finished_at ? 'success' : 'default'}>
-                          {service.finished_at ? 'Tamamlandı' : 'Devam Ediyor'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" asChild>
-                          <a href={`/services/${service.id}`}>
-                            <Eye className="h-4 w-4" />
-                           <span className="sr-only">Görüntüle</span>
-                          </Link>
-                        </Button>
-                      </TableCell>
+      {vehicle.services && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Son 5 Servis Kaydı</CardTitle>
+            <CardDescription>Araç için yapılan son 5 servis kaydı</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {vehicle.services && vehicle.services.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Servis No</TableHead>
+                      <TableHead>Başlangıç</TableHead>
+                      <TableHead className="hidden md:table-cell">Bitiş</TableHead>
+                      <TableHead>Durum</TableHead>
+                      <TableHead className="text-right">İşlem</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-4">Bu araç için servis kaydı bulunmamaktadır.</p>
-          )}
-        </CardContent>
-      </Card>)}
+                  </TableHeader>
+                  <TableBody>
+                    {vehicle.services.slice(-5).map((service) => (
+                      <TableRow key={service.id}>
+                        <TableCell className="font-medium">#{service.id}</TableCell>
+                        <TableCell>{formatDate(service.started_at)}</TableCell>
+                        <TableCell className="hidden md:table-cell">{formatDate(service.finished_at)}</TableCell>
+                        <TableCell>
+                          <Badge variant={service.finished_at ? 'success' : 'default'}>
+                            {service.finished_at ? 'Tamamlandı' : 'Devam Ediyor'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" asChild>
+                            <Link href={`/services/${service.id}`}>
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">Görüntüle</span>
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">Bu araç için servis kaydı bulunmamaktadır.</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <div className="flex items-center gap-4 justify-end">
-          <Button asChild>
-            <Link href={`/vehicles/${vehicle.license_plate}/services`}>
-              Tümünü Görüntüle
-            </Link>
-          </Button>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Yeni Servis Ekle
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <NewServiceForm vehicleLicensePlate={vehicle.license_plate} onSuccess={handleNewServiceSuccess} />
-            </DialogContent>
-          </Dialog>
-              <Plus className="mr-2 h-4 w-4" />
-              Yeni Servis Ekle
-            </Link>
-          </Button>
+        <Button asChild>
+          <Link href={`/vehicles/${vehicle.license_plate}/services`}>
+            Tümünü Görüntüle
+          </Link>
+        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" /> Yeni Servis Ekle
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <NewServiceForm vehicleLicensePlate={vehicle.license_plate} onSuccess={handleNewServiceSuccess} />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

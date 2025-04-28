@@ -78,6 +78,8 @@ export const apiService = {
       api.get(`/vehicles/${licensePlate}/services/${serviceId}`),
 
     addService: (licensePlate: string, serviceData: any) => api.post(`/vehicles/${licensePlate}/services`, serviceData),
+
+    update: (licensePlate: string, vehicleData: any) => api.put(`/vehicles/${licensePlate}`, vehicleData),
   },
 
   // Owner related API calls
