@@ -26,7 +26,7 @@ interface ItemProps {
   id: number
   name: string
   description: string | null
-  default_price: string
+
 
 
 }
@@ -189,7 +189,7 @@ export default function ProductsPage() {
                       <TableCell className="font-medium">#{item.id}</TableCell>
                       <TableCell>{item.name}</TableCell>
                       <TableCell className="hidden md:table-cell">{item.description || "-"}</TableCell>
-                      <TableCell>{formatCurrency(Number.parseFloat(item.default_price))}</TableCell>
+                      
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleEditItem(item)}>

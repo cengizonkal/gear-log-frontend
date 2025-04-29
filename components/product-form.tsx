@@ -18,9 +18,7 @@ const formSchema = z.object({
     message: "Ürün/hizmet adı en az 2 karakter olmalıdır.",
   }),
   description: z.string().optional(),
-  price: z.string().min(1, {
-    message: "Fiyat gereklidir.",
-  }),
+
   type: z.string({
     required_error: "Lütfen tür seçiniz.",
   }),
@@ -31,8 +29,7 @@ interface ProductFormProps {
     id: number
     name: string
     description: string | null
-    price: string
-    default_price: string
+    
   } | null
   onSuccess?: (data: any) => void
 }
@@ -47,7 +44,7 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
-      price: initialData?.default_price ? String(initialData.default_price) : "",
+      
       type: initialData?.description?.includes("Hizmet") ? "service" : "product",
     },
   })
@@ -66,7 +63,6 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
         company_id: user.company.id,
         name: values.name,
         description: values.description || null,
-        price: Number.parseFloat(values.price),
       }
 
       let response
@@ -145,19 +141,7 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fiyat (₺)</FormLabel>
-              <FormControl>
-                <Input placeholder="450" type="number" step="0.01" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (

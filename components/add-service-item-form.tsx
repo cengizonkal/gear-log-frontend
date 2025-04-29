@@ -34,7 +34,7 @@ interface ItemOption {
   id: number
   name: string
   description: string | null
-  default_price: string
+  
 }
 
 export function AddServiceItemForm({ serviceId, vehicleLicensePlate, onSuccess }: AddServiceItemFormProps) {
@@ -69,12 +69,8 @@ export function AddServiceItemForm({ serviceId, vehicleLicensePlate, onSuccess }
     fetchItems()
   }, [user])
 
-  // Update price when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      form.setValue("price", selectedItem.default_price)
-    }
-  }, [selectedItem, form])
+  
+  
 
   const handleItemChange = (itemId: string) => {
     const item = items.find((i) => i.id.toString() === itemId)
