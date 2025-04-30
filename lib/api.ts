@@ -115,6 +115,10 @@ export const apiService = {
       api.post(`/vehicles/${vehicleLicensePlate}/services/${serviceId}/items`, itemData),
   },
 
+  servicesStatuses: {
+    getAll: () => api.get("/service-statuses"),
+  },
+
   items: {
     getAll: (company:number) => api.get(`/companies/${company}items`),
     getById: (company:number,id: number) => api.get(`/companies/${company}items/${id}`),
