@@ -13,10 +13,22 @@ import { cn, formatDate } from "@/lib/utils"
 import { apiService } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { RefreshCw, CheckCircle, RotateCw, Clock, CalendarIcon, Settings, User, X } from "lucide-react"
+import {
+    RefreshCw,
+    CheckCircle,
+    RotateCw,
+    Clock,
+    CalendarIcon,
+    Settings,
+    User,
+    X,
+    Check,
+    ChevronDown,
+} from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ServiceCreatePayload, ServiceStatus, Vehicle } from "@/types"; // Assuming you have these types defined
+import type { ServiceStatus, Vehicle } from "@/types" // Assuming you have these types defined
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 const FormSchema = z.object({
     vehicleId: z.string({ required_error: "Araç seçimi zorunludur." }),
@@ -25,6 +37,12 @@ const FormSchema = z.object({
     finishedAt: z.date().optional(),
     status: z.string().optional(),
 })
+
+interface CustomerProps {
+    id: number
+    name: string
+    phone: string
+}
 
 type AddServiceFormValues = z.infer<typeof FormSchema>
 
@@ -37,13 +55,14 @@ const colorMap = {
 }
 
 export function AddServiceForm() {
-    const [vehicles, setVehicles] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [statuses, setStatuses] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [licensePlate, setLicensePlate] = useState('');
-    const { toast } = useToast();
-    const router = useRouter();
+    const [vehicles, setVehicles] = useState([])
+    const [customers, setCustomers] = useState<CustomerProps[]>([])
+    const [filteredCustomers, setFilteredCustomers] = useState<CustomerProps[]>([])
+    const [statuses, setStatuses] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [licensePlate, setLicensePlate] = useState("")
+    const { toast } = useToast()
+    const router = useRouter()
 
     const handleCreateService = async (values: AddServiceFormValues) => {
         if (!licensePlate.trim()) {
@@ -51,111 +70,118 @@ export function AddServiceForm() {
                 variant: "destructive",
                 title: "Hata!",
                 description: "Lütfen bir plaka giriniz",
-            });
-            return;
+            })
+            return
         }
 
-        setIsLoading(true);
+        setIsLoading(true)
         try {
             const payload = {
                 vehicle_id: Number(values.vehicleId),
                 user_id: Number(values.userId),
                 started_at: formatDate(values.startedAt, "YYYY-MM-DD HH:mm"),
-                finished_at: values.finishedAt
-                    ? formatDate(values.finishedAt, "YYYY-MM-DD HH:mm")
-                    : undefined,
+                finished_at: values.finishedAt ? formatDate(values.finishedAt, "YYYY-MM-DD HH:mm") : undefined,
                 status: values.status,
-            };
+            }
 
-            await apiService.services.create(payload);
+            await apiService.services.create(payload)
 
             toast({
                 title: "Başarılı",
                 description: "Servis kaydı başarıyla eklendi.",
-            });
+            })
 
-            router.refresh();
-            form.reset();
-            await fetchVehicles(licensePlate);
+            router.refresh()
+            form.reset()
+            await fetchVehicles(licensePlate)
         } catch (error) {
-            console.error("Service creation error:", error);
+            console.error("Service creation error:", error)
             toast({
                 variant: "destructive",
                 title: "Hata!",
                 description: error.message || "Servis kaydı oluşturulurken bir hata oluştu.",
-            });
+            })
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
-    const fetchVehicles = async (plate: string): Promise<void> => {
-        try {
-            const response = await apiService.vehicles.getById(plate);
-            setVehicles(response.data.data as Vehicle[]);
-        } catch (error) {
-            console.error('Error fetching vehicles:', error);
-            toast({
-                variant: "destructive",
-                title: "Hata!",
-                description: "Araç bilgileri alınırken bir hata oluştu.",
-            });
+    useEffect(() => {
+        const fetchVehicles = async (plate: string) => {
+            try {
+                setIsLoading(true)
+                const response = await apiService.vehicles.getById(plate)
+                setVehicles(response.data.data as Vehicle[])
+            } catch (error) {
+                console.error("Error fetching vehicles:", error)
+                toast({
+                    variant: "destructive",
+                    title: "Hata!",
+                    description: "Araç bilgileri alınırken bir hata oluştu.",
+                })
+            } finally {
+                setIsLoading(false)
+            }
         }
-    };
 
-    const fetchUsers = async (): Promise<void> => {
-        try {
-            const response = await apiService.users.getAll();
-            setUsers(response.data.data as User[]);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            toast({
-                variant: "destructive",
-                title: "Hata!",
-                description: "Kullanıcı bilgileri alınırken bir hata oluştu.",
-            });
+        const fetchCustomers = async () => {
+            try {
+                setIsLoading(true)
+                const response = await apiService.owners.getAll() // Assuming you have a customers API endpoint
+                setCustomers(response.data.data)
+                setFilteredCustomers(response.data.data)
+            } catch (err) {
+                console.error("Failed to fetch customers:", err)
+                setError("Müşterileri yüklerken bir hata oluştu.")
+            } finally {
+                setIsLoading(false)
+            }
         }
-    };
 
-    const fetchStatuses = async (): Promise<void> => {
-        setIsLoading(true);
-        try {
-            const response = await apiService.servicesStatuses.getAll();
-            const statusData = extractStatusData(response);
-            setStatuses(statusData.slice(0, 7));
-        } catch (error) {
-            console.error("Error fetching statuses:", error);
-            setDefaultStatuses();
-        } finally {
-            setIsLoading(false);
+        const fetchStatuses = async (): Promise<void> => {
+            setIsLoading(true)
+            try {
+                const response = await apiService.servicesStatuses.getAll()
+                const statusData = extractStatusData(response)
+                setStatuses(statusData.slice(0, 7))
+            } catch (error) {
+                console.error("Error fetching statuses:", error)
+                setDefaultStatuses()
+            } finally {
+                setIsLoading(false)
+            }
         }
-    };
 
-// Helper functions
+        fetchCustomers()
+        fetchVehicles(licensePlate)
+        fetchStatuses()
+    }, [])
+
+    // Helper functions
     const extractStatusData = (response: any): ServiceStatus[] => {
         if (response.data && Array.isArray(response.data)) {
-            return response.data;
+            return response.data
         }
         if (response.data?.data && Array.isArray(response.data.data)) {
-            return response.data.data;
+            return response.data.data
         }
         if (Array.isArray(response)) {
-            return response;
+            return response
         }
-        return [];
-    };
+        return []
+    }
 
     const setDefaultStatuses = (): void => {
         setStatuses([
             { id: "pending", name: "Beklemede", color: "amber" },
             { id: "in-progress", name: "İşlemde", color: "blue" },
-            { id: "completed", name: "Tamamlandı", color: "green"},
+            { id: "completed", name: "Tamamlandı", color: "green" },
             { id: "part-waiting", name: "Parça Bekliyor", color: "red" },
             { id: "external-service", name: "Dış Servis", color: "purple" },
             { id: "approval-waiting", name: "Onay Bekliyor", color: "amber" },
             { id: "cancelled", name: "İptal Edildi", color: "red" },
-        ]);
-    };
+        ])
+    }
 
     // Initialize form
     const form = useForm<AddServiceFormValues>({
@@ -165,21 +191,9 @@ export function AddServiceForm() {
             userId: "",
             startedAt: new Date(),
             finishedAt: undefined,
-            status: "pending"
-        }
-    });
-
-// Initial data fetch
-    useEffect(() => {
-        const initializeData = async () => {
-            await Promise.all([
-                fetchVehicles(licensePlate),
-                fetchUsers(),
-                fetchStatuses(),
-            ]);
-        };
-        initializeData();
-    }, []);
+            status: "pending",
+        },
+    })
 
     return (
         <Form {...form}>
@@ -199,7 +213,7 @@ export function AddServiceForm() {
                                 <SelectContent>
                                     {vehicles.map((vehicle) => (
                                         <SelectItem key={vehicle.id} value={vehicle.id.toString()}>
-                                            {vehicle.brand} {vehicle.vehicle_model} - {vehicle.license_plate}
+                                           {vehicle.license_plate}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -208,26 +222,67 @@ export function AddServiceForm() {
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="userId"
                     render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Kullanıcı</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Kullanıcı seçiniz" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {users.map((user) => (
-                                        <SelectItem key={user.id} value={user.id.toString()}>
-                                            {user.name} - {user.email}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                        <FormItem className="flex flex-col">
+                            <FormLabel>Müşteri</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
+                                        >
+                                            {field.value
+                                                ? customers.find((customer) => customer.id.toString() === field.value)?.name
+                                                : "Müşteri seçiniz"}
+                                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                    <Command>
+                                        <CommandInput
+                                            placeholder="Müşteri ara..."
+                                            onValueChange={(search) => {
+                                                const filtered = customers.filter(
+                                                    (customer) =>
+                                                        customer.name.toLowerCase().includes(search.toLowerCase()) ||
+                                                        customer.phone.toLowerCase().includes(search.toLowerCase()),
+                                                )
+                                                setFilteredCustomers(filtered)
+                                            }}
+                                        />
+                                        <CommandEmpty>Müşteri bulunamadı.</CommandEmpty>
+                                        <CommandGroup>
+                                            <CommandList>
+                                                {filteredCustomers.map((customer) => (
+                                                    <CommandItem
+                                                        key={customer.id}
+                                                        value={customer.name}
+                                                        onSelect={() => {
+                                                            form.setValue("userId", customer.id.toString())
+                                                        }}
+                                                    >
+                                                        <Check
+                                                            className={cn(
+                                                                "mr-2 h-4 w-4",
+                                                                customer.id.toString() === field.value ? "opacity-100" : "opacity-0",
+                                                            )}
+                                                        />
+                                                        {customer.name}
+                                                        <span className="ml-2 text-xs text-muted-foreground">{customer.phone}</span>
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandList>
+                                        </CommandGroup>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
                             <FormMessage />
                         </FormItem>
                     )}
