@@ -67,7 +67,9 @@ export const apiService = {
 
   // Vehicle related API calls
   vehicles: {
-    search: (licensePlate: string) => api.get(`/vehicles/${licensePlate}`),
+    // search: (licensePlate: string) => api.get(`/vehicles/${licensePlate}`),
+
+    search: (query: string) => api.get(`/vehicles/search/${query}`),
 
     getById: (licensePlate: string) => api.get(`/vehicles/${licensePlate}`),
 
@@ -115,6 +117,7 @@ export const apiService = {
       api.post(`/vehicles/${vehicleLicensePlate}/services/${serviceId}/items`, itemData),
   },
 
+  // Service status related API calls
   servicesStatuses: {
     getAll: () => api.get("/service-statuses"),
   },
