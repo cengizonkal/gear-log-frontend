@@ -1,5 +1,7 @@
 "use client"
 
+import { CommandItem } from "@/components/ui/command"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
@@ -13,10 +15,21 @@ import { cn, formatDate } from "@/lib/utils"
 import { apiService } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import {RefreshCw, CheckCircle, RotateCw, Clock, CalendarIcon, Settings, User, X, Check, ChevronDown,} from "lucide-react"
+import {
+    RefreshCw,
+    CheckCircle,
+    RotateCw,
+    Clock,
+    CalendarIcon,
+    Settings,
+    User,
+    X,
+    Check,
+    ChevronDown,
+} from "lucide-react"
 import { Separator } from "@/components/ui/separator"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList } from "@/components/ui/command"
+import dayjs from "dayjs"
 
 const FormSchema = z.object({
     vehicleId: z.string({ required_error: "Araç seçimi zorunludur." }),
@@ -38,9 +51,9 @@ interface VehicleProps {
 }
 
 interface ServiceStatus {
-    id: number;
-    name: string;
-    color: string;
+    id: number
+    name: string
+    color: string
 }
 
 type AddServiceFormValues = z.infer<typeof FormSchema>
@@ -53,7 +66,7 @@ const colorMap = {
     purple: "bg-purple-100 text-purple-700 border-purple-300",
 }
 
-export function AddServiceForm() {
+export function AddServiceForm({ onClose }: { onClose?: () => void }) {
     const [vehicles, setVehicles] = useState<VehicleProps[]>([])
     const [filteredVehicles, setFilteredVehicles] = useState<VehicleProps[]>([])
     const [customers, setCustomers] = useState<CustomerProps[]>([])
@@ -63,38 +76,38 @@ export function AddServiceForm() {
     const [licensePlate, setLicensePlate] = useState("")
     const { toast } = useToast()
     const router = useRouter()
+    const [error, setError] = useState<string | null>(null)
 
     const handleCreateService = async (values: AddServiceFormValues) => {
-        if (!licensePlate.trim()) {
-            toast({
-                variant: "destructive",
-                title: "Hata!",
-                description: "Lütfen bir plaka giriniz",
-            })
-            return
-        }
-
         setIsLoading(true)
         try {
             const payload = {
                 vehicle_id: Number(values.vehicleId),
-                user_id: Number(values.userId),
                 started_at: dayjs(values.startedAt).format("YYYY-MM-DD HH:mm"),
-                finished_at: values.finishedAt ? dayjs(values.finishedAt).format("YYYY-MM-DD HH:mm") : undefined,
-                status: values.status,
+                finished_at: values.finishedAt ? dayjs(values.finishedAt).format("YYYY-MM-DD HH:mm") : null,
+                status_id: Number(values.status),
             }
 
-            await apiService.services.create(payload)
+            // get selected vehicle's license plate
+            const selectedVehicle = filteredVehicles.find((v) => v.id.toString() === values.vehicleId)
+            if (!selectedVehicle) {
+                throw new Error("Seçili araç bulunamadı.")
+            }
+
+            await apiService.vehicles.addService(selectedVehicle.license_plate, payload)
 
             toast({
                 title: "Başarılı",
                 description: "Servis kaydı başarıyla eklendi.",
             })
 
+            if (onClose) {
+                onClose()
+            }
+
             router.refresh()
             form.reset()
-            await setVehicles(licensePlate)
-        } catch (error) {
+        } catch (error: any) {
             console.error("Service creation error:", error)
             toast({
                 variant: "destructive",
@@ -107,8 +120,6 @@ export function AddServiceForm() {
     }
 
     useEffect(() => {
-
-
         const fetchCustomers = async () => {
             try {
                 setIsLoading(true)
@@ -137,10 +148,8 @@ export function AddServiceForm() {
             }
         }
 
-        fetchCustomers()
         fetchStatuses()
     }, [])
-
 
     const extractStatusData = (response: any): ServiceStatus[] => {
         if (response.data && Array.isArray(response.data)) {
@@ -182,7 +191,6 @@ export function AddServiceForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleCreateService)} className="space-y-6  max-w-3xl">
-
                 <FormField
                     control={form.control}
                     name="vehicleId"
@@ -239,75 +247,10 @@ export function AddServiceForm() {
                                                         <Check
                                                             className={cn(
                                                                 "mr-2 h-4 w-4",
-                                                                vehicle.id.toString() === field.value ? "opacity-100" : "opacity-0"
+                                                                vehicle.id.toString() === field.value ? "opacity-100" : "opacity-0",
                                                             )}
                                                         />
                                                         {vehicle.license_plate.toUpperCase()}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandList>
-                                        </CommandGroup>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="userId"
-                    render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                            <FormLabel>Müşteri</FormLabel>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <FormControl>
-                                        <Button
-                                            variant="outline"
-                                            role="combobox"
-                                            className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
-                                        >
-                                            {field.value
-                                                ? customers.find((customer) => customer.id.toString() === field.value)?.name
-                                                : "Müşteri seçiniz"}
-                                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-full p-0">
-                                    <Command>
-                                        <CommandInput
-                                            placeholder="Müşteri ara..."
-                                            onValueChange={(search) => {
-                                                const filtered = customers.filter(
-                                                    (customer) =>
-                                                        customer.name.toLowerCase().includes(search.toLowerCase()) ||
-                                                        customer.phone.toLowerCase().includes(search.toLowerCase()),
-                                                )
-                                                setFilteredCustomers(filtered)
-                                            }}
-                                        />
-                                        <CommandEmpty>Müşteri bulunamadı.</CommandEmpty>
-                                        <CommandGroup>
-                                            <CommandList>
-                                                {filteredCustomers.map((customer) => (
-                                                    <CommandItem
-                                                        key={customer.id}
-                                                        value={customer.name}
-                                                        onSelect={() => {
-                                                            form.setValue("userId", customer.id.toString())
-                                                        }}
-                                                    >
-                                                        <Check
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4",
-                                                                customer.id.toString() === field.value ? "opacity-100" : "opacity-0",
-                                                            )}
-                                                        />
-                                                        {customer.name}
-                                                        <span className="ml-2 text-xs text-muted-foreground">{customer.phone}</span>
                                                     </CommandItem>
                                                 ))}
                                             </CommandList>
@@ -385,8 +328,10 @@ export function AddServiceForm() {
                             <FormItem>
                                 <FormControl>
                                     <ToggleGroup
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
+                                        onValueChange={(value) => {
+                                            if (value) field.onChange(value)
+                                        }}
+                                        value={field.value}
                                         type="single"
                                         className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"
                                     >
@@ -405,16 +350,25 @@ export function AddServiceForm() {
                                                 else if (status.name.toLowerCase().includes("parça bekleniyor")) StatusIcon = Clock
                                                 else if (status.name.toLowerCase().includes("dış servis")) StatusIcon = Settings
                                                 else if (status.name.toLowerCase().includes("onay bekleniyor")) StatusIcon = User
-                                                else if (status.name.toLowerCase().includes("İptal Edildi")) StatusIcon = X
+                                                else if (status.name.toLowerCase().includes("iptal edildi")) StatusIcon = X
                                                 else StatusIcon = RefreshCw
+
+                                                const statusId = status.id.toString()
+                                                const isSelected = field.value === statusId
 
                                                 return (
                                                     <ToggleGroupItem
-                                                        key={status.id}
-                                                        value={status.id.toString()}
-                                                        className={`flex flex-col sm:flex-row items-center justify-center gap-1 p-3 data-[state=on]:${
-                                                            colorMap[status.color as keyof typeof colorMap] || "bg-gray-100 text-gray-700 border-gray-300"
-                                                        }`}
+                                                        key={statusId}
+                                                        value={statusId}
+                                                        aria-label={status.name}
+                                                        data-state={isSelected ? "on" : "off"}
+                                                        className={cn(
+                                                            "flex flex-col sm:flex-row items-center justify-center gap-1 p-3 border rounded-md transition-colors",
+                                                            isSelected
+                                                                ? colorMap[status.color as keyof typeof colorMap] ||
+                                                                "bg-gray-100 text-gray-700 border-gray-300"
+                                                                : "bg-white hover:bg-gray-50",
+                                                        )}
                                                     >
                                                         <StatusIcon className="w-4 h-4" />
                                                         <span className="text-xs sm:text-sm">{status.name}</span>
@@ -437,7 +391,3 @@ export function AddServiceForm() {
         </Form>
     )
 }
-function dayjs(startedAt: Date) {
-    throw new Error("Function not implemented.")
-}
-

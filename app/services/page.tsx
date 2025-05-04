@@ -27,10 +27,12 @@ interface ServiceProps {
   }
   started_at: string | null
   finished_at: string | null
+  status_id: number
 }
 
 export default function ServicesPage() {
   const [services, setServices] = useState<ServiceProps[]>([])
+  const [statuses, setStatuses] = useState([])
   const [filteredServices, setFilteredServices] = useState<ServiceProps[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -66,6 +68,7 @@ export default function ServicesPage() {
               service.vehicle.license_plate.toLowerCase().includes(query) ||
               service.vehicle.brand.toLowerCase().includes(query) ||
               service.vehicle.vehicle_model.toLowerCase().includes(query) ||
+              service.status_id.toString().includes(query) ||
               service.user.name.toLowerCase().includes(query),
       )
       setFilteredServices(filtered)
@@ -150,7 +153,7 @@ export default function ServicesPage() {
                     <TableHead>Servis No</TableHead>
                     <TableHead>Plaka</TableHead>
                     <TableHead className="hidden md:table-cell">Araç</TableHead>
-                    <TableHead className="hidden md:table-cell">Müşteri</TableHead>
+                    <TableHead className="hidden md:table-cell">Makinist</TableHead>
                     <TableHead className="hidden md:table-cell">Tarih</TableHead>
                     <TableHead>Durum</TableHead>
                     <TableHead className="text-right">İşlem</TableHead>
@@ -167,17 +170,26 @@ export default function ServicesPage() {
                       filteredServices.map((service) => (
                           <TableRow key={service.id}>
                             <TableCell className="font-medium">#{service.id}</TableCell>
-                            <TableCell>{service.vehicle.license_plate}</TableCell>
+                            <TableCell>{service.vehicle.license_plate.toUpperCase()}</TableCell>
                             <TableCell className="hidden md:table-cell">
                               {service.vehicle.brand} {service.vehicle.vehicle_model}
                             </TableCell>
                             <TableCell className="hidden md:table-cell">{service.user.name}</TableCell>
                             <TableCell className="hidden md:table-cell">{formatDate(service.started_at)}</TableCell>
                             <TableCell>
-                              <Badge variant={service.finished_at ? "success" : "default"}>
-                                {service.finished_at ? "Tamamlandı" : "Devam Ediyor"}
+                              <Badge
+                                  style={{ backgroundColor: status.color }}
+                                  className="text-white"
+                              >
+                                {status.name}
                               </Badge>
+
                             </TableCell>
+                            {/*<TableCell>*/}
+                            {/*  <Badge variant={service.finished_at ? "success" : "default"}>*/}
+                            {/*    {service.finished_at ? "Tamamlandı" : "Devam Ediyor"}*/}
+                            {/*  </Badge>*/}
+                            {/*</TableCell>*/}
                             <TableCell className="text-right">
                               <Button variant="ghost" size="icon" asChild>
                                 <Link href={`/services/${service.id}`}>

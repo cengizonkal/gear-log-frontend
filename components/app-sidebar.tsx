@@ -26,9 +26,8 @@ export function AppSidebar() {
     return null
   }
 
-  const isActive = (path: string) => {
-    return pathname === path
-  }
+  const isActive = (route: string) => pathname?.startsWith(route);
+
 
   return (
     <Sidebar>
