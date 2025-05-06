@@ -66,7 +66,7 @@ const colorMap = {
     purple: "bg-purple-100 text-purple-700 border-purple-300",
 }
 
-export function AddServiceForm({ onClose }: { onClose?: () => void }) {
+export function AddServiceForm({ onClose, onSuccess }: { onClose?: () => void; onSuccess?: () => void }) {
     const [vehicles, setVehicles] = useState<VehicleProps[]>([])
     const [filteredVehicles, setFilteredVehicles] = useState<VehicleProps[]>([])
     const [customers, setCustomers] = useState<CustomerProps[]>([])
@@ -101,9 +101,8 @@ export function AddServiceForm({ onClose }: { onClose?: () => void }) {
                 description: "Servis kaydı başarıyla eklendi.",
             })
 
-            if (onClose) {
-                onClose()
-            }
+            if (onClose) onClose();
+            if (onSuccess) onSuccess(); // Trigger table refresh
 
             router.refresh()
             form.reset()

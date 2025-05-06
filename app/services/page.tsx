@@ -57,20 +57,22 @@ export default function ServicesPage() {
     const [searchQuery, setSearchQuery] = useState("")
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-    useEffect(() => {
-        const fetchServices = async () => {
-            try {
-                setIsLoading(true)
-                const response = await apiService.services.getAll()
-                setServices(response.data.data)
-                setFilteredServices(response.data.data)
-            } catch (err) {
-                console.error("Failed to fetch services:", err)
-                setError("Servisleri yüklerken bir hata oluştu.")
-            } finally {
-                setIsLoading(false)
-            }
+    const fetchServices = async () => {
+        try {
+            setIsLoading(true)
+            const response = await apiService.services.getAll()
+            setServices(response.data.data)
+            setFilteredServices(response.data.data)
+        } catch (err) {
+            console.error("Failed to fetch services:", err)
+            setError("Servisleri yüklerken bir hata oluştu.")
+        } finally {
+            setIsLoading(false)
         }
+    }
+
+    useEffect(() => {
+
 
         const fetchStatuses = async () => {
             try {
@@ -149,7 +151,10 @@ export default function ServicesPage() {
                             <DialogDescription>Yeni bir servis kaydı oluşturun.</DialogDescription>
                         </DialogHeader>
                         <AddServiceForm
+                            onClose={() => setIsDialogOpen(false)}
                             onSuccess={() => {
+                                setIsDialogOpen(false);
+                                fetchServices(); // Refresh the table
                             }}
                         />
                     </DialogContent>
