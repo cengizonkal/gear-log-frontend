@@ -3,7 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import { Eye } from "lucide-react"
+import {CheckCircle, Clock, Eye, RotateCw, Settings, User, X} from "lucide-react"
+import React from "react";
 
 interface ServiceProps {
   id: number
@@ -11,6 +12,10 @@ interface ServiceProps {
     license_plate: string
     vehicle_model: string
     brand: string
+  }
+  status: {
+    name: string
+    color: string
   }
   started_at: string | null
   finished_at: string | null
@@ -22,6 +27,16 @@ export function RecentServicesTable({ services }: { services: ServiceProps[] }) 
   if (!services || services.length === 0) {
     return <div className="text-center py-4 text-muted-foreground">Henüz servis kaydı bulunmamaktadır.</div>
   }
+
+  const statusMap = {
+    "Beklemede": { color: "bg-amber-500 text-white", icon: Clock },
+    "Devam Ediyor": { color: "bg-blue-500 text-white", icon: RotateCw },
+    "Tamamlandı": { color: "bg-green-500 text-white", icon: CheckCircle },
+    "Parça Bekleniyor": { color: "bg-orange-500 text-white", icon: Clock },
+    "Dış Servis": { color: "bg-gray-500 text-white", icon: Settings },
+    "Onay Bekleniyor": { color: "bg-purple-500 text-white", icon: User },
+    "İptal Edildi": { color: "bg-red-500 text-white", icon: X },
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -46,8 +61,13 @@ export function RecentServicesTable({ services }: { services: ServiceProps[] }) 
               </TableCell>
               <TableCell className="hidden md:table-cell">{formatDate(service.started_at)}</TableCell>
               <TableCell>
-                <Badge variant={service.finished_at ? "success" : "default"}>
-                  {service.finished_at ? "Tamamlandı" : "Devam Ediyor"}
+                <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
+                  {statusMap[service.status.name]?.icon && (
+                      React.createElement(statusMap[service.status.name].icon, {
+                        className: "w-4 h-4 inline-block mr-1",
+                      })
+                  )}
+                  {service.status.name}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
