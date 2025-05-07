@@ -47,6 +47,9 @@ interface VehicleProps {
   vin: string | null;
   mileage: number | null;
   services: ServiceProps[];
+  year: number | null;
+  engine_capacity: number | null;
+  weight: number | null;
 }
 
 interface Props {

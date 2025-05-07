@@ -13,6 +13,9 @@ interface VehicleDetailsProps {
 export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps) {
   const [mileage, setMileage] = useState(vehicle.mileage || "");
   const [vin, setVin] = useState(vehicle.vin || "");
+  const [year, setYear] = useState(vehicle.year || "");
+  const [engineCapacity, setEngineCapacity] = useState(vehicle.engine_capacity || "");
+  const [weight, setWeight] = useState(vehicle.weight || "");
   const [brands, setBrands] = useState([]);
   const [fuelTypes, setFuelTypes] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -24,7 +27,10 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
   useEffect(() => {
     setMileage(vehicle.mileage || "");
     setVin(vehicle.vin || "");
-  }, [vehicle.mileage, vehicle.vin]);
+    setYear(vehicle.year || "");
+    setEngineCapacity(vehicle.engine_capacity || "");
+    setWeight(vehicle.weight || "");
+  }, [vehicle.mileage, vehicle.vin, vehicle.year, vehicle.engine_capacity, vehicle.weight]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -80,6 +86,9 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
         vin,
         fuel_type: selectedFuelType,
         vehicle_model: selectedModel,
+        year,
+        engine_capacity: engineCapacity,
+        weight,
       });
       onVehicleUpdate({
         ...vehicle,
@@ -146,6 +155,18 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-600">VIN:</span>
           <Input type="text" value={vin} onChange={e => setVin(e.target.value)} className="w-2/3" />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600">Yıl:</span>
+          <Input type="number" value={year} onChange={e => setYear(e.target.value)} className="w-2/3" />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600">Motor Hacmi (cc):</span>
+          <Input type="number" value={engineCapacity} onChange={e => setEngineCapacity(e.target.value)} className="w-2/3" />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600">Ağırlık (kg):</span>
+          <Input type="number" value={weight} onChange={e => setWeight(e.target.value)} className="w-2/3" />
         </div>
       </div>
       <Button onClick={handleSave} className="mt-6 w-full" disabled={loading}>
