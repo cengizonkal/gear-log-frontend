@@ -36,7 +36,17 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import {useState} from "react";
+import React, {useState} from "react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import {Plus} from "lucide-react";
+import {AddOwnerForm} from "@/components/add-owner-form";
 
 const reportFormSchema = z.object({
     startDate: z.date({
@@ -82,7 +92,9 @@ export default function ReportsPage() {
 
     return (
         <div className="w-full max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-6">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-center">Rapor Oluştur</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Rapor</h2>
+            </div>
 
             <Card>
                 <CardHeader>
