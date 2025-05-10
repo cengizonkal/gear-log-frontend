@@ -456,16 +456,16 @@ export default function ServiceDetailPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                service?.items?.map((item) => {
-                  const itemTotal = Number.parseFloat(item.price) * Number.parseFloat(item.quantity)
-                  return (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">{item.description || "-"}</TableCell>
-                      <TableCell className="text-right">{item.quantity}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(Number.parseFloat(item.price))}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(itemTotal)}</TableCell>
-                      </TableRow>
+                  service?.items?.map((item, index) => {
+                    const itemTotal = Number.parseFloat(item.price) * Number.parseFloat(item.quantity);
+                    return (
+                        <TableRow key={`${item.id}-${index}`}>
+                          <TableCell className="font-medium">{item.name}</TableCell>
+                          <TableCell className="hidden md:table-cell">{item.description || "-"}</TableCell>
+                          <TableCell className="text-right">{item.quantity}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(Number.parseFloat(item.price))}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(itemTotal)}</TableCell>
+                        </TableRow>
                     )
                   })
                 )}
