@@ -34,7 +34,7 @@ export function AppSidebar() {
       <SidebarHeader className="flex items-center px-4 py-2">
         <div className="flex items-center gap-2">
           <Wrench className="h-6 w-6" />
-          <span className="text-lg font-bold">GEARLOG</span>
+          <span className="text-lg font-bold">Makinistim</span>
         </div>
         <SidebarTrigger className="ml-auto md:hidden" />
       </SidebarHeader>
@@ -93,7 +93,7 @@ export function AppSidebar() {
             <SidebarMenuButton asChild isActive={isActive("/reports")}>
               <Link href="/reports">
                 <FileText className="h-5 w-5" />
-                <span>Raporlar</span>
+                <span>Rapor</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

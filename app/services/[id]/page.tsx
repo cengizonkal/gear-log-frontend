@@ -1,13 +1,26 @@
 "use client"
 
-import { useEffect, useState, ChangeEvent } from "react"
+import { useAuth } from "@/hooks/use-auth"
+import React, { useEffect, useState, ChangeEvent } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { apiService } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, ArrowLeft, Plus, Car, User, CalendarIcon, CheckCircle, Pencil, Check } from "lucide-react"
+import {
+  Loader2,
+  ArrowLeft,
+  Plus,
+  Car,
+  User,
+  CalendarIcon,
+  CheckCircle,
+  Pencil,
+  Check,
+  Newspaper,
+  Clock, RotateCw, Settings, X
+} from "lucide-react"
 import { formatDateTime, formatCurrency, formatDate } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
@@ -23,6 +36,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { AddServiceItemForm } from "@/components/add-service-item-form"
+import { statusMap } from "@/lib/status-map";
+
+
 
 interface ServiceItemProps {
   id: number
@@ -30,6 +46,17 @@ interface ServiceItemProps {
   description: string | null
   quantity: string
   price: string
+}
+
+interface User {
+    id: number
+    name: string
+    email: string
+    phone: string | null
+    company: {
+        id: number
+        name: string
+    }
 }
 
 interface ServiceDetailsProps {
@@ -41,31 +68,40 @@ interface ServiceDetailsProps {
     brand: string
   }
   description: string | null
-  user: {
-    id: number
-    name: string
-    email: string
-    phone: string
-  }
+  user: User
   started_at: string | null
   finished_at: string | null
+  status: {
+    id: number
+    name: string
+    color: string
+  }
   created_at: string | null
   updated_at: string | null
   items: ServiceItemProps[]
+}
+
+interface StatusProps {
+  id: number
+  name: string
+  color: string
 }
 
 export default function ServiceDetailPage() {
   const params = useParams()
   const router = useRouter()
   const [service, setService] = useState<ServiceDetailsProps | null>(null)
+  const [status, setStatus] = useState<StatusProps[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editedServiceData, setEditedServiceData] = useState<Partial<ServiceDetailsProps>>({});
-  
 
-  useEffect(() => {
+  const { user } = useAuth()
+  const loggedInUserCompanyId = user?.company?.id
+
+    useEffect(() => {
     const fetchServiceDetails = async () => {
       try {
         setIsLoading(true)
@@ -81,7 +117,19 @@ export default function ServiceDetailPage() {
       }
     }
 
+    const fetchStatuses = async () => {
+      try {
+        setIsLoading(true)
+        const response = await apiService.servicesStatuses.getAll()
+        setStatus(response.data.data)
+      } catch (err) {
+        console.error("Failed to fetch statuses:", err)
+        setError("Durumları yüklerken bir hata oluştu.")
+      }
+    }
+
     fetchServiceDetails()
+    fetchStatuses()
   }, [params.id])
 
   const handleEditClick = () => {
@@ -91,20 +139,26 @@ export default function ServiceDetailPage() {
       const updatedServiceData = {
         started_at: editedServiceData.started_at,
         description: editedServiceData.description,
+        status: editedServiceData.status?.id || service?.status.id,
       };
-  
+
       apiService.services.update(serviceId, updatedServiceData)
         .then(response => {
           console.log("Service updated:", response.data);
           // Update the service state with the new data
+          const selectedStatus = status.find(
+              (s) => s.id === Number(updatedServiceData.status)
+          );
+
+          // Servis state'ini güncelle
           setService((prevService) => {
             if (!prevService) return null;
             return {
               ...prevService,
               ...updatedServiceData,
+              status: selectedStatus || prevService.status, // status nesnesini güncelle
             };
           });
-          
         })
         .catch(error => {
           console.error("Failed to update service:", error);
@@ -118,7 +172,7 @@ export default function ServiceDetailPage() {
       setIsEditing(true);
     }
   };
-  
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditedServiceData(prevState => ({
@@ -145,6 +199,7 @@ export default function ServiceDetailPage() {
       return total + price * quantity
     }, 0)
   }
+
 
   if (isLoading) {
     return (
@@ -204,21 +259,31 @@ export default function ServiceDetailPage() {
           </Button>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Servis #{service?.id}</h2>
         </div>
-        <Button variant={isEditing ? "default" : "outline"} onClick={handleEditClick} className="w-full sm:w-auto">
-          {isEditing ? (
-            <>
-              <Check className="mr-2 h-4 w-4" />
-              Kaydet
-            </>
-          ) : (
-            <>
-              <Pencil className="mr-2 h-4 w-4" />
-              Düzenle
-            </>
+          {/* Hide the edit button if the user doesn't own the service. */}
+          {service?.user?.company?.id === loggedInUserCompanyId && (
+              <Button variant={isEditing ? "default" : "outline"} onClick={handleEditClick}
+                      className="w-full sm:w-auto">
+                  {isEditing ? (
+                      <>
+                          <Check className="mr-2 h-4 w-4"/>
+                          Kaydet
+                      </>
+                  ) : (
+                      <>
+                          <Pencil className="mr-2 h-4 w-4"/>
+                          Düzenle
+                      </>
+                  )}
+              </Button>
           )}
-        </Button>
-        <Badge variant={service?.finished_at ? "success" : "default"} className="self-start sm:self-auto">
-          {service.finished_at ? "Tamamlandı" : "Devam Ediyor"}
+
+        <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
+          {statusMap[service.status.name]?.icon && (
+              React.createElement(statusMap[service.status.name].icon, {
+                className: "w-4 h-4 inline-block mr-1",
+              })
+          )}
+          {service.status.name}
         </Badge>
       </div>
 
@@ -276,40 +341,71 @@ export default function ServiceDetailPage() {
             <CardTitle>Servis Bilgileri</CardTitle>
             <CardDescription>Servis zaman bilgileri</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start gap-3">
-            <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-              <Label htmlFor="started_at" className="font-medium">Başlangıç Tarihi</Label>
-                {isEditing ? (
-                  <Input
-                      type="date"
-                      name="started_at"
-                      id="started_at"
-                      value={editedServiceData.started_at?.split('T')[0] || ''}
-                      onChange={handleInputChange}
-                    />
-                  
-                ) : (
-                  <p className="text-sm text-muted-foreground">{formatDateTime(service?.started_at)}</p>
-                )}
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Left Side */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <Label htmlFor="started_at" className="font-medium">Başlangıç Tarihi</Label>
+                  {isEditing ? (
+                      <Input
+                          type="date"
+                          name="started_at"
+                          id="started_at"
+                          value={editedServiceData.started_at?.split('T')[0] || ''}
+                          onChange={handleInputChange}
+                      />
+                  ) : (
+                      <p className="text-sm text-muted-foreground">{formatDateTime(service?.started_at)}</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-                <p className="font-medium">Bitiş Tarihi</p>
-                {service?.finished_at ? (
+
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="font-medium">Bitiş Tarihi</p>
+                  {service?.finished_at ? (
                       <p className="text-sm text-muted-foreground">
                         {formatDateTime(service.finished_at)}
                       </p>
-                    ) : (
+                  ) : (
                       <p className="text-sm text-muted-foreground">Henüz tamamlanmadı</p>
-                    )}
-                
+                  )}
+
+                </div>
+              </div>
+
+            </div>
+
+            {/* Right Side */}
+            <div className="flex items-start gap-3">
+              <Newspaper className="h-5 w-5 mt-0.5 text-muted-foreground" />
+              <div className="w-full">
+                <p className="font-medium">Durum</p>
+                {isEditing ? (
+                    <select
+                        name="status_id"
+                        value={editedServiceData.status_id || service?.status.id}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      {status.map((status) => (
+                          <option key={status.id} value={status.id}>
+                            {status.name}
+                          </option>
+                      ))}
+                    </select>
+                ) : (
+                    <p className={`text-sm text-${service?.status.color}`}>
+                      {service?.status.name}
+                    </p>
+                )}
               </div>
             </div>
           </CardContent>
+
         </Card>
       </div>
 
@@ -352,7 +448,7 @@ export default function ServiceDetailPage() {
                   <TableHead className="text-right">Toplam</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody> 
+              <TableBody>
               {service?.items?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
@@ -360,16 +456,16 @@ export default function ServiceDetailPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                service?.items?.map((item) => {
-                  const itemTotal = Number.parseFloat(item.price) * Number.parseFloat(item.quantity)
-                  return (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">{item.description || "-"}</TableCell>
-                      <TableCell className="text-right">{item.quantity}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(Number.parseFloat(item.price))}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(itemTotal)}</TableCell>
-                      </TableRow>
+                  service?.items?.map((item, index) => {
+                    const itemTotal = Number.parseFloat(item.price) * Number.parseFloat(item.quantity);
+                    return (
+                        <TableRow key={`${item.id}-${index}`}>
+                          <TableCell className="font-medium">{item.name}</TableCell>
+                          <TableCell className="hidden md:table-cell">{item.description || "-"}</TableCell>
+                          <TableCell className="text-right">{item.quantity}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(Number.parseFloat(item.price))}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(itemTotal)}</TableCell>
+                        </TableRow>
                     )
                   })
                 )}

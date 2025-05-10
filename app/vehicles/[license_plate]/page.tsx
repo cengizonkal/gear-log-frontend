@@ -20,14 +20,18 @@ import {
 } from "@/components/ui/dialog"
 import { NewServiceForm } from "@/components/new-service-form";
 import Link from 'next/link';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { OwnerDetails } from '@/components/owner-details';
 import { VehicleDetails } from '@/components/vehicle-details';
+import {statusMap} from "@/lib/status-map";
 
 interface ServiceProps {
   id: number;
   started_at: string | null;
   finished_at: string | null;
+  status: {
+    name: string;
+    color: string;
+  }
 }
 
 interface OwnerProps {
@@ -168,8 +172,13 @@ export default function VehicleDetailPage({ params }: Props) {
                         <TableCell>{formatDate(service.started_at)}</TableCell>
                         <TableCell className="hidden md:table-cell">{formatDate(service.finished_at)}</TableCell>
                         <TableCell>
-                          <Badge variant={service.finished_at ? 'success' : 'default'}>
-                            {service.finished_at ? 'Tamamlandı' : 'Devam Ediyor'}
+                          <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
+                            {statusMap[service.status.name]?.icon && (
+                                React.createElement(statusMap[service.status.name].icon, {
+                                  className: "w-4 h-4 inline-block mr-1",
+                                })
+                            )}
+                            {service.status.name}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">

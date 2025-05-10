@@ -91,64 +91,64 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
-              <Wrench className="h-6 w-6 text-primary-foreground" />
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
+                <Wrench className="h-6 w-6 text-primary-foreground" />
+              </div>
             </div>
-          </div>
-          <CardTitle className="text-2xl text-center">GEARLOG Servis Takip</CardTitle>
-          <CardDescription className="text-center">
-            Hesabınıza giriş yaparak servis takip sistemini kullanmaya başlayın
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-posta</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ornek@tamirhane.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Şifre</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={loginLoading}>
-                {loginLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex flex-col">
-          <div className="text-sm text-muted-foreground text-center">GEARLOG Servis Takip Sistemi v1.0</div>
-        </CardFooter>
-      </Card>
-      <ApiDebug />
-    </div>
+            <h2 className="font-semibold tracking-tight text-2xl text-center">Makinistim</h2>
+            <p className="text-sm text-muted-foreground text-center">
+              Hesabınıza giriş yaparak servis takip sistemini kullanmaya başlayın
+            </p>
+          </CardHeader>
+          <CardContent>
+            {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>E-posta</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ornek@makinistim.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Şifre</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="••••••" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button type="submit" className="w-full" disabled={loginLoading}>
+                  {loginLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+          <CardFooter className="flex flex-col items-center">
+            <p className="text-sm text-muted-foreground text-center">Makinistim Servis Takip Sistemi v1.0</p>
+          </CardFooter>
+        </Card>
+        <ApiDebug />
+      </div>
   )
 }

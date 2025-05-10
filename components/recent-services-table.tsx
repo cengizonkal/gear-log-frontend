@@ -3,7 +3,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import { Eye } from "lucide-react"
+import {CheckCircle, Clock, Eye, RotateCw, Settings, User, X} from "lucide-react"
+import React from "react";
+import { statusMap } from "@/lib/status-map";
+
 
 interface ServiceProps {
   id: number
@@ -11,6 +14,10 @@ interface ServiceProps {
     license_plate: string
     vehicle_model: string
     brand: string
+  }
+  status: {
+    name: string
+    color: string
   }
   started_at: string | null
   finished_at: string | null
@@ -40,14 +47,19 @@ export function RecentServicesTable({ services }: { services: ServiceProps[] }) 
           {services.map((service) => (
             <TableRow key={service.id}>
               <TableCell className="font-medium">#{service.id}</TableCell>
-              <TableCell>{service.vehicle.license_plate}</TableCell>
+              <TableCell>{service.vehicle.license_plate.toUpperCase()}</TableCell>
               <TableCell className="hidden md:table-cell">
                 {service.vehicle.brand} {service.vehicle.vehicle_model}
               </TableCell>
               <TableCell className="hidden md:table-cell">{formatDate(service.started_at)}</TableCell>
               <TableCell>
-                <Badge variant={service.finished_at ? "success" : "default"}>
-                  {service.finished_at ? "Tamamlandı" : "Devam Ediyor"}
+                <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
+                  {statusMap[service.status.name]?.icon && (
+                      React.createElement(statusMap[service.status.name].icon, {
+                        className: "w-4 h-4 inline-block mr-1",
+                      })
+                  )}
+                  {service.status.name}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
