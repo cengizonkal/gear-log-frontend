@@ -36,6 +36,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { AddServiceItemForm } from "@/components/add-service-item-form"
+import { statusMap } from "@/lib/status-map";
+
+
 
 interface ServiceItemProps {
   id: number
@@ -197,15 +200,6 @@ export default function ServiceDetailPage() {
     }, 0)
   }
 
-  const statusMap = {
-    "Beklemede": { color: "bg-amber-500 text-white", icon: Clock },
-    "Devam Ediyor": { color: "bg-blue-500 text-white", icon: RotateCw },
-    "Tamamlandı": { color: "bg-green-500 text-white", icon: CheckCircle },
-    "Parça Bekleniyor": { color: "bg-orange-500 text-white", icon: Clock },
-    "Dış Servis": { color: "bg-gray-500 text-white", icon: Settings },
-    "Onay Bekleniyor": { color: "bg-purple-500 text-white", icon: User },
-    "İptal Edildi": { color: "bg-red-500 text-white", icon: X },
-  };
 
   if (isLoading) {
     return (
