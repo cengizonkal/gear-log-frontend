@@ -81,38 +81,29 @@ export default function ReportsPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen w-full">
-            <div className="w-full max-w-6xl p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8">
-                <div className="mt-2">
-                    <h2 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold mb-3 xs:mb-4 sm:mb-5 text-center">
-                        Rapor Oluştur
-                    </h2>
+        <div className="w-full max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-6">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-center">Rapor Oluştur</h1>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Filtreleme</CardTitle>
+                </CardHeader>
+                <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 xs:space-y-4 sm:space-y-5 max-w-2xl mx-auto">
-                            <div className="flex flex-col gap-3 xs:gap-4 sm:flex-row sm:gap-5">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Başlangıç Tarihi */}
                                 <FormField
                                     control={form.control}
                                     name="startDate"
-                                    render={({field}) => (
-                                        <FormItem className="flex flex-col flex-1">
-                                            <FormLabel className="text-xs xs:text-sm sm:text-base">
-                                                Başlangıç Tarihi
-                                            </FormLabel>
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Başlangıç Tarihi</FormLabel>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
-                                                        <Button
-                                                            variant={"outline"}
-                                                            className={cn(
-                                                                "w-full h-10 xs:h-9 sm:h-10 pl-3 text-left font-normal",
-                                                                !field.value && "text-muted-foreground"
-                                                            )}
-                                                        >
-                                                            {field.value ? (
-                                                                format(field.value, "dd/MM/yyyy")
-                                                            ) : (
-                                                                <span className="text-xs xs:text-sm sm:text-base">Tarih Seçin</span>
-                                                            )}
+                                                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                            {field.value ? format(field.value, "dd/MM/yyyy") : "Tarih Seçin"}
                                                         </Button>
                                                     </FormControl>
                                                 </PopoverTrigger>
@@ -126,33 +117,23 @@ export default function ReportsPage() {
                                                     />
                                                 </PopoverContent>
                                             </Popover>
-                                            <FormMessage className="text-xs"/>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
+
+                                {/* Bitiş Tarihi */}
                                 <FormField
                                     control={form.control}
                                     name="endDate"
-                                    render={({field}) => (
-                                        <FormItem className="flex flex-col flex-1">
-                                            <FormLabel className="text-xs xs:text-sm sm:text-base">
-                                                Bitiş Tarihi
-                                            </FormLabel>
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Bitiş Tarihi</FormLabel>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
-                                                        <Button
-                                                            variant={"outline"}
-                                                            className={cn(
-                                                                "w-full h-10 xs:h-9 sm:h-10 pl-3 text-left font-normal",
-                                                                !field.value && "text-muted-foreground"
-                                                            )}
-                                                        >
-                                                            {field.value ? (
-                                                                format(field.value, "dd/MM/yyyy")
-                                                            ) : (
-                                                                <span className="text-xs xs:text-sm sm:text-base">Tarih Seçin</span>
-                                                            )}
+                                                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                            {field.value ? format(field.value, "dd/MM/yyyy") : "Tarih Seçin"}
                                                         </Button>
                                                     </FormControl>
                                                 </PopoverTrigger>
@@ -166,150 +147,102 @@ export default function ReportsPage() {
                                                     />
                                                 </PopoverContent>
                                             </Popover>
-                                            <FormMessage className="text-xs"/>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {/* Rapor Türü */}
+                                <FormField
+                                    control={form.control}
+                                    name="reportType"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Rapor Türü</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Rapor Türü Seçin" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="gelir">Gelir Raporu</SelectItem>
+                                                    <SelectItem value="genel">Genel Rapor</SelectItem>
+                                                    <SelectItem value="servis">Servis Raporu</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                             </div>
 
-                            <FormField
-                                control={form.control}
-                                name="reportType"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel className="text-xs xs:text-sm sm:text-base">
-                                            Rapor Türü
-                                        </FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger className="h-10 xs:h-9 sm:h-10">
-                                                    <SelectValue
-                                                        placeholder="Rapor Türü Seçin"
-                                                        className="text-xs xs:text-sm sm:text-base"
-                                                    />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="gelir" className="text-xs xs:text-sm sm:text-base">
-                                                    Gelir Raporu
-                                                </SelectItem>
-                                                <SelectItem value="genel" className="text-xs xs:text-sm sm:text-base">
-                                                    Genel Rapor
-                                                </SelectItem>
-                                                <SelectItem value="servis" className="text-xs xs:text-sm sm:text-base">
-                                                    Servis Raporu
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage className="text-xs"/>
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div className="flex justify-center">
-                                <Button
-                                    type="submit"
-                                    className="w-full sm:w-auto h-10 xs:h-9 sm:h-10 text-xs xs:text-sm sm:text-base"
-                                >
-                                    Rapor Oluştur
+                            <div className="flex justify-end">
+                                <Button type="submit">
+                                    Raporu Oluştur
                                 </Button>
                             </div>
                         </form>
                     </Form>
+                </CardContent>
+            </Card>
 
-                    <div className="mt-4 xs:mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 max-w-4xl mx-auto">
-                        <Card className="p-3 xs:p-4 sm:p-5">
-                            <CardHeader className="p-0 pb-2 xs:pb-3 sm:pb-4">
-                                <CardTitle className="text-xs xs:text-sm sm:text-base">
-                                    Tamamlanan Servisler
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <p className="text-lg xs:text-xl sm:text-2xl font-bold">150</p>
-                            </CardContent>
-                        </Card>
-                        <Card className="p-3 xs:p-4 sm:p-5">
-                            <CardHeader className="p-0 pb-2 xs:pb-3 sm:pb-4">
-                                <CardTitle className="text-xs xs:text-sm sm:text-base">
-                                    Tüm Servisler
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <p className="text-lg xs:text-xl sm:text-2xl font-bold">200</p>
-                            </CardContent>
-                        </Card>
-                        <Card className="p-3 xs:p-4 sm:p-5">
-                            <CardHeader className="p-0 pb-2 xs:pb-3 sm:pb-4">
-                                <CardTitle className="text-xs xs:text-sm sm:text-base">
-                                    Servislerin Toplam Ücreti
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <p className="text-lg xs:text-xl sm:text-2xl font-bold">₺50,000</p>
-                            </CardContent>
-                        </Card>
-                    </div>
+            {/* Rapor Kartları */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Tamamlanan Servisler</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">150</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Tüm Servisler</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">200</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium">Servislerin Toplam Ücreti</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">₺50,000</div>
+                    </CardContent>
+                </Card>
+            </div>
 
-                    <div className="mt-4 xs:mt-5 sm:mt-6 max-w-5xl mx-auto">
-                        <div className="overflow-x-auto">
-                            <div className="min-w-[300px] sm:min-w-[400px] md:min-w-[500px] lg:min-w-[600px]">
-                                <ResponsiveContainer
-                                    width="100%"
-                                    height={300}
-                                    className="text-xs sm:text-sm"
-                                >
-                                    <BarChart
-                                        data={data}
-                                        margin={{
-                                            top: 5,
-                                            right: 5,
-                                            left: 0,
-                                            bottom: 5,
-                                        }}
-                                    >
-                                        <CartesianGrid strokeDasharray="3 3"/>
-                                        <XAxis
-                                            dataKey="name"
-                                            tick={{fontSize: '0.65rem sm:text-xs md:text-sm'}}
-                                        />
-                                        <YAxis
-                                            tickFormatter={(value) => `${value}₺`}
-                                            tick={{fontSize: '0.65rem sm:text-xs md:text-sm'}}
-                                        />
-                                        <Tooltip
-                                            formatter={(value) => [`${value}₺`, "Gelir"]}
-                                            contentStyle={{
-                                                fontSize: '0.75rem sm:text-xs md:text-sm',
-                                                padding: '4px 8px',
-                                                borderRadius: '6px'
-                                            }}
-                                        />
-                                        <Legend
-                                            wrapperStyle={{
-                                                paddingTop: '10px',
-                                                fontSize: '0.75rem sm:text-xs md:text-sm'
-                                            }}
-                                        />
-                                        <Bar
-                                            dataKey="Gelir"
-                                            fill="#82ca9d"
-                                            radius={[4, 4, 0, 0]}
-                                        />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
+            {/* Grafik */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Gelir Grafiği</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[300px] w-full overflow-x-auto">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis tickFormatter={(value) => `${value}₺`} />
+                                <Tooltip formatter={(value) => [`${value}₺`, "Gelir"]} />
+                                <Legend />
+                                <Bar dataKey="Gelir" fill="#82ca9d" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
+                </CardContent>
+            </Card>
 
-                    <div className="flex justify-center mt-3 xs:mt-4 sm:mt-5">
-                        <Button
-                            className="w-full sm:w-auto h-10 xs:h-9 sm:h-10 text-xs xs:text-sm sm:text-base"
-                        >
-                            PDF İndir
-                        </Button>
-                    </div>
-                </div>
+            {/* PDF Butonu */}
+            <div className="flex justify-end">
+                <Button variant="outline">
+                    PDF İndir
+                </Button>
             </div>
         </div>
+
     );
 }

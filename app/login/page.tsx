@@ -99,7 +99,7 @@ export default function LoginPage() {
               <Wrench className="h-6 w-6 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">GEARLOG Servis Takip</CardTitle>
+          <CardTitle className="text-2xl text-center">Makinistim</CardTitle>
           <CardDescription className="text-center">
             Hesabınıza giriş yaparak servis takip sistemini kullanmaya başlayın
           </CardDescription>
@@ -119,7 +119,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>E-posta</FormLabel>
                     <FormControl>
-                      <Input placeholder="ornek@tamirhane.com" {...field} />
+                      <Input placeholder="ornek@makinistim.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -145,7 +145,7 @@ export default function LoginPage() {
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col">
-          <div className="text-sm text-muted-foreground text-center">GEARLOG Servis Takip Sistemi v1.0</div>
+          <div className="text-sm text-muted-foreground text-center">Makinistim Servis Takip Sistemi v1.0</div>
         </CardFooter>
       </Card>
       <ApiDebug />
