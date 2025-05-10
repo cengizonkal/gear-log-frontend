@@ -1,14 +1,26 @@
 "use client"
 
 import { useAuth } from "@/hooks/use-auth"
-import { useEffect, useState, ChangeEvent } from "react"
+import React, { useEffect, useState, ChangeEvent } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { apiService } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, ArrowLeft, Plus, Car, User, CalendarIcon, CheckCircle, Pencil, Check, Newspaper} from "lucide-react"
+import {
+  Loader2,
+  ArrowLeft,
+  Plus,
+  Car,
+  User,
+  CalendarIcon,
+  CheckCircle,
+  Pencil,
+  Check,
+  Newspaper,
+  Clock, RotateCw, Settings, X
+} from "lucide-react"
 import { formatDateTime, formatCurrency, formatDate } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
@@ -185,6 +197,16 @@ export default function ServiceDetailPage() {
     }, 0)
   }
 
+  const statusMap = {
+    "Beklemede": { color: "bg-amber-500 text-white", icon: Clock },
+    "Devam Ediyor": { color: "bg-blue-500 text-white", icon: RotateCw },
+    "Tamamlandı": { color: "bg-green-500 text-white", icon: CheckCircle },
+    "Parça Bekleniyor": { color: "bg-orange-500 text-white", icon: Clock },
+    "Dış Servis": { color: "bg-gray-500 text-white", icon: Settings },
+    "Onay Bekleniyor": { color: "bg-purple-500 text-white", icon: User },
+    "İptal Edildi": { color: "bg-red-500 text-white", icon: X },
+  };
+
   if (isLoading) {
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -261,8 +283,13 @@ export default function ServiceDetailPage() {
               </Button>
           )}
 
-          <Badge variant={service?.finished_at ? "success" : "default"} className="self-start sm:self-auto">
-          {service.finished_at ? "Tamamlandı" : "Devam Ediyor"}
+        <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
+          {statusMap[service.status.name]?.icon && (
+              React.createElement(statusMap[service.status.name].icon, {
+                className: "w-4 h-4 inline-block mr-1",
+              })
+          )}
+          {service.status.name}
         </Badge>
       </div>
 
