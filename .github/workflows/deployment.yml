@@ -1,0 +1,25 @@
+name: Deploy to Server
+on:
+  release:
+    types: [published]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy using Git Pull
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
+            cd ${{ secrets.DEPLOY_PATH }} && 
+            git fetch --all && 
+            git checkout ${{ github.event.release.tag_name }} && 
+            npm run build &&
+            sudo /bin/systemctl restart nextjs
+          "
