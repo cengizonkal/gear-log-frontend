@@ -138,8 +138,9 @@ export default function ServiceDetailPage() {
       const serviceId = Number(params.id);
       const updatedServiceData = {
         started_at: editedServiceData.started_at,
+        finished_at: editedServiceData.finished_at,
         description: editedServiceData.description,
-        status: editedServiceData.status?.id || service?.status.id,
+        status_id: editedServiceData.status?.id || service?.status.id,
       };
 
       apiService.services.update(serviceId, updatedServiceData)
@@ -147,7 +148,7 @@ export default function ServiceDetailPage() {
           console.log("Service updated:", response.data);
           // Update the service state with the new data
           const selectedStatus = status.find(
-              (s) => s.id === Number(updatedServiceData.status)
+              (s) => s.id === Number(updatedServiceData.status_id)
           );
 
           // Servis state'ini güncelle
@@ -155,8 +156,10 @@ export default function ServiceDetailPage() {
             if (!prevService) return null;
             return {
               ...prevService,
-              ...updatedServiceData,
-              status: selectedStatus || prevService.status, // status nesnesini güncelle
+              started_at: updatedServiceData.started_at ?? null,
+              finished_at: updatedServiceData.finished_at ?? null,
+              description: updatedServiceData.description ?? null,
+              status: selectedStatus || prevService.status,
             };
           });
         })
@@ -180,6 +183,17 @@ export default function ServiceDetailPage() {
       [name]: value
     }));
   };
+
+  // Status değişikliği için ayrı bir handler
+  const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedStatusId = Number(e.target.value);
+    const selectedStatus = status.find((s) => s.id === selectedStatusId);
+    setEditedServiceData((prevState) => ({
+      ...prevState,
+      status: selectedStatus,
+    }));
+  };
+
   const handleAddItem = (newItem: ServiceItemProps) => {
     if (service) {
       setService({
@@ -200,6 +214,8 @@ export default function ServiceDetailPage() {
     }, 0)
   }
 
+  // Kullanıcı yetkili mi?
+  const isUserAuthorized = service?.user?.company?.id === loggedInUserCompanyId;
 
   if (isLoading) {
     return (
@@ -259,27 +275,9 @@ export default function ServiceDetailPage() {
           </Button>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Servis #{service?.id}</h2>
         </div>
-          {/* Hide the edit button if the user doesn't own the service. */}
-          {service?.user?.company?.id === loggedInUserCompanyId && (
-              <Button variant={isEditing ? "default" : "outline"} onClick={handleEditClick}
-                      className="w-full sm:w-auto">
-                  {isEditing ? (
-                      <>
-                          <Check className="mr-2 h-4 w-4"/>
-                          Kaydet
-                      </>
-                  ) : (
-                      <>
-                          <Pencil className="mr-2 h-4 w-4"/>
-                          Düzenle
-                      </>
-                  )}
-              </Button>
-          )}
-
-        <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
-          {statusMap[service.status.name]?.icon && (
-              React.createElement(statusMap[service.status.name].icon, {
+        <Badge className={statusMap[service.status.name as keyof typeof statusMap]?.color || "bg-gray-100 text-gray-700"}>
+          {statusMap[service.status.name as keyof typeof statusMap]?.icon && (
+              React.createElement(statusMap[service.status.name as keyof typeof statusMap].icon, {
                 className: "w-4 h-4 inline-block mr-1",
               })
           )}
@@ -288,6 +286,107 @@ export default function ServiceDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Servis Bilgileri</CardTitle>
+            <CardDescription>Servis açıklaması ve zaman bilgileri</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Açıklama Alanı */}
+            <div>
+              <Label htmlFor="description" className="font-medium">Açıklama</Label>
+              {isUserAuthorized ? (
+                <Textarea
+                  name="description"
+                  value={editedServiceData.description || ""}
+                  onChange={handleInputChange}
+                  placeholder="Servis açıklaması"
+                  className="resize-y"
+                />
+              ) : (
+                <p>{service?.description || "-"}</p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Başlangıç Tarihi */}
+              <div className="flex items-start gap-3">
+                <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <Label htmlFor="started_at" className="font-medium">Başlangıç Tarihi</Label>
+                  {isUserAuthorized ? (
+                    <Input
+                      type="date"
+                      name="started_at"
+                      id="started_at"
+                      value={editedServiceData.started_at?.split('T')[0] || ''}
+                      onChange={handleInputChange}
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">{formatDateTime(service?.started_at)}</p>
+                  )}
+                </div>
+              </div>
+              {/* Durum */}
+              <div className="flex items-start gap-3">
+                <Newspaper className="h-5 w-5 mt-0.5 text-muted-foreground" />
+                <div className="w-full">
+                  <p className="font-medium">Durum</p>
+                  {isUserAuthorized ? (
+                    <select
+                      name="status"
+                      value={editedServiceData.status?.id || service?.status.id}
+                      onChange={handleStatusChange}
+                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    >
+                      {status.map((status) => (
+                        <option key={status.id} value={status.id}>
+                          {status.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className={`text-sm text-${service?.status.color}`}>
+                      {service?.status.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            {/* Bitiş Tarihi */}
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <div>
+                <Label htmlFor="finished_at" className="font-medium">Bitiş Tarihi</Label>
+                {isUserAuthorized ? (
+                  <Input
+                    type="date"
+                    name="finished_at"
+                    id="finished_at"
+                    value={editedServiceData.finished_at?.split('T')[0] || ''}
+                    onChange={handleInputChange}
+                  />
+                ) : (
+                  service?.finished_at ? (
+                    <p className="text-sm text-muted-foreground">
+                      {formatDateTime(service.finished_at)}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Henüz tamamlanmadı</p>
+                  )
+                )}
+              </div>
+            </div>
+            {/* Kaydet butonu */}
+            {isUserAuthorized && (
+              <div className="flex justify-end">
+                <Button onClick={handleEditClick} variant="default">
+                  <Check className="mr-2 h-4 w-4" /> Kaydet
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        {/* Araç Bilgileri Kartı Aynen Kalsın */}
         <Card>
           <CardHeader>
             <CardTitle>Araç Bilgileri</CardTitle>
@@ -312,100 +411,6 @@ export default function ServiceDetailPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
-
-        <Card>
-            <CardHeader>
-                <CardTitle>Servis Açıklaması</CardTitle>
-                <CardDescription>Servis açıklaması</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isEditing ? (
-                    <Textarea
-                        name="description"
-                        value={editedServiceData.description || ""}
-                        onChange={handleInputChange}
-                        placeholder="Servis açıklaması"
-                        className="resize-y"
-                    />
-                ) : (
-                    <p>
-                    {service?.description || "-"}
-                    </p>
-                )}
-            </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Servis Bilgileri</CardTitle>
-            <CardDescription>Servis zaman bilgileri</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Left Side */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <Label htmlFor="started_at" className="font-medium">Başlangıç Tarihi</Label>
-                  {isEditing ? (
-                      <Input
-                          type="date"
-                          name="started_at"
-                          id="started_at"
-                          value={editedServiceData.started_at?.split('T')[0] || ''}
-                          onChange={handleInputChange}
-                      />
-                  ) : (
-                      <p className="text-sm text-muted-foreground">{formatDateTime(service?.started_at)}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="font-medium">Bitiş Tarihi</p>
-                  {service?.finished_at ? (
-                      <p className="text-sm text-muted-foreground">
-                        {formatDateTime(service.finished_at)}
-                      </p>
-                  ) : (
-                      <p className="text-sm text-muted-foreground">Henüz tamamlanmadı</p>
-                  )}
-
-                </div>
-              </div>
-
-            </div>
-
-            {/* Right Side */}
-            <div className="flex items-start gap-3">
-              <Newspaper className="h-5 w-5 mt-0.5 text-muted-foreground" />
-              <div className="w-full">
-                <p className="font-medium">Durum</p>
-                {isEditing ? (
-                    <select
-                        name="status_id"
-                        value={editedServiceData.status_id || service?.status.id}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                      {status.map((status) => (
-                          <option key={status.id} value={status.id}>
-                            {status.name}
-                          </option>
-                      ))}
-                    </select>
-                ) : (
-                    <p className={`text-sm text-${service?.status.color}`}>
-                      {service?.status.name}
-                    </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-
         </Card>
       </div>
 
