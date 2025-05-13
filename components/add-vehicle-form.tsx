@@ -11,8 +11,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
-  license_plate: z.string().min(7, {
-    message: "Plaka en az 7 karakter olmalıdır.",
+  license_plate: z.string().min(5, {
+    message: "Plaka en az 5 karakter olmalıdır.",
   }),
   brand: z.string().min(2, {
     message: "Marka en az 2 karakter olmalıdır.",

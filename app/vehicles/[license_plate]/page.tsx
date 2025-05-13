@@ -131,7 +131,7 @@ export default function VehicleDetailPage({ params }: Props) {
       <Card>
         <CardHeader>
           <CardTitle>Araç Bilgileri</CardTitle>
-          <CardDescription>Plaka: {vehicle.license_plate}</CardDescription>
+          <CardDescription>Plaka: {vehicle.license_plate.toUpperCase()}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

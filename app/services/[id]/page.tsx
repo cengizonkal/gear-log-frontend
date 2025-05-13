@@ -399,7 +399,7 @@ export default function ServiceDetailPage() {
                 <p className="font-medium">
                   {service?.vehicle.brand} {service?.vehicle.vehicle_model}
                 </p>
-                <p className="text-sm text-muted-foreground">Plaka: {service?.vehicle.license_plate}</p>
+                <p className="text-sm text-muted-foreground">Plaka: {service?.vehicle.license_plate.toUpperCase()}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">

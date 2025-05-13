@@ -119,18 +119,13 @@ export default function VehicleServicesPage({ params }: Props) {
                             {service.description || <span className="text-muted-foreground italic">Açıklama yok</span>}
                           </TableCell>
                           <TableCell>
-                            <Badge
-                                className={
-                                    statusMap[service.status?.name]?.color ??
-                                    "bg-gray-100 text-gray-700"
-                                }
-                            >
-                              {statusMap[service.status?.name]?.icon && (
-                                  React.createElement(statusMap[service.status.name].icon, {
+                            <Badge className={statusMap[service.status.name as keyof typeof statusMap]?.color || "bg-gray-100 text-gray-700"}>
+                              {statusMap[service.status.name as keyof typeof statusMap]?.icon && (
+                                  React.createElement(statusMap[service.status.name as keyof typeof statusMap].icon, {
                                     className: "w-4 h-4 inline-block mr-1",
                                   })
                               )}
-                              {service.status?.name ?? "Bilinmiyor"}
+                              {service.status.name}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">

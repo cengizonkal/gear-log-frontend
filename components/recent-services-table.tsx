@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import {CheckCircle, Clock, Eye, RotateCw, Settings, User, X} from "lucide-react"
+import { Eye } from "lucide-react"
 import React from "react";
 import { statusMap } from "@/lib/status-map";
 
@@ -53,9 +53,9 @@ export function RecentServicesTable({ services }: { services: ServiceProps[] }) 
               </TableCell>
               <TableCell className="hidden md:table-cell">{formatDate(service.started_at)}</TableCell>
               <TableCell>
-                <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
-                  {statusMap[service.status.name]?.icon && (
-                      React.createElement(statusMap[service.status.name].icon, {
+                <Badge className={statusMap[service.status.name as keyof typeof statusMap]?.color || "bg-gray-100 text-gray-700"}>
+                  {statusMap[service.status.name as keyof typeof statusMap]?.icon && (
+                      React.createElement(statusMap[service.status.name as keyof typeof statusMap].icon, {
                         className: "w-4 h-4 inline-block mr-1",
                       })
                   )}
