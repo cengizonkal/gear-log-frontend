@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Wrench } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
-import { ApiDebug } from "@/components/api-debug"
+
 
 const formSchema = z.object({
   email: z.string().email({
@@ -148,7 +148,6 @@ export default function LoginPage() {
             <p className="text-sm text-muted-foreground text-center">Makinistim Servis Takip Sistemi v1.0</p>
           </CardFooter>
         </Card>
-        <ApiDebug />
       </div>
   )
 }

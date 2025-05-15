@@ -65,22 +65,8 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/vehicles")}>
-              <Link href="/vehicles">
-                <Car className="h-5 w-5" />
-                <span>Araçlar</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/customers")}>
-              <Link href="/customers">
-                <User className="h-5 w-5" />
-                <span>Müşteriler</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          
+          
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={isActive("/products")}>
               <Link href="/products">
