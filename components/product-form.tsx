@@ -12,6 +12,7 @@ import { useState } from "react"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
 import { Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -38,6 +39,7 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,7 +52,7 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user?.company?.id) {
+    if (!user?.company_id) {
       setError("Şirket bilgisi bulunamadı.")
       return
     }
@@ -60,7 +62,7 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
 
     try {
       const itemData = {
-        company_id: user.company.id,
+        company_id: user.company_id,
         name: values.name,
         description: values.description || null,
       }
@@ -69,14 +71,21 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
 
       if (initialData) {
         // Update existing item
-        response = await apiService.companies.updateItem(user.company.id, initialData.id, itemData)
+        response = await apiService.companies.updateItem(user.company_id, initialData.id, itemData)
       } else {
         // Create new item
-        response = await apiService.companies.createItem(user.company.id, itemData)
+        response = await apiService.companies.createItem(user.company_id, itemData)
       }
 
+      // Use server message if available
+      const serverMsg = response.data?.message || (initialData ? "Ürün/Hizmet güncellendi" : "Ürün/Hizmet eklendi")
+      toast({
+        title: serverMsg,
+        description: `“${values.name}” başarıyla ${initialData ? "güncellendi" : "eklendi"}.`,
+      })
+
       if (onSuccess) {
-        onSuccess(response.data.data)
+        onSuccess(response.data.item)
       }
     } catch (err: any) {
       console.error("Form submission error:", err)
@@ -118,29 +127,6 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tür</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tür seçin" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="product">Ürün</SelectItem>
-                  <SelectItem value="service">Hizmet</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         
 
         <Button type="submit" className="w-full" disabled={isLoading}>

@@ -10,6 +10,7 @@ interface User {
   name: string
   email: string
   role: string
+  company_id: number 
 }
 
 interface AuthContextType {

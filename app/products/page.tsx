@@ -12,7 +12,8 @@ import { ProductForm } from "@/components/product-form"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { formatCurrency } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+
 import {
   Dialog,
   DialogContent,
@@ -26,13 +27,11 @@ interface ItemProps {
   id: number
   name: string
   description: string | null
-
-
-
 }
 
 export default function ProductsPage() {
   const { user } = useAuth()
+  const { toast } = useToast()
   const [items, setItems] = useState<ItemProps[]>([])
   const [filteredItems, setFilteredItems] = useState<ItemProps[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -43,11 +42,11 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      if (!user?.company?.id) return
+      if (!user?.company_id) return
 
       try {
         setIsLoading(true)
-        const response = await apiService.companies.getItems(user.company.id)
+        const response = await apiService.companies.getItems(user.company_id)
         setItems(response.data.data)
         setFilteredItems(response.data.data)
       } catch (err) {
@@ -92,18 +91,30 @@ export default function ProductsPage() {
     setItems((prevItems) => prevItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)))
     setSelectedItem(null)
     setIsDialogOpen(false)
+
   }
 
   const handleDeleteItem = async (itemId: number) => {
-    if (!user?.company?.id) return
+    if (!user?.company_id) return
 
     if (window.confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
       try {
-        await apiService.companies.deleteItem(user.company.id, itemId)
+        const response = await apiService.companies.deleteItem(user.company_id, itemId)
         setItems((prevItems) => prevItems.filter((item) => item.id !== itemId))
-      } catch (err) {
+        if (response?.data?.message) {
+          toast({
+            title: response.data.message,
+          })
+        }
+      } catch (err: any) {
         console.error("Failed to delete item:", err)
         setError("Ürün silinirken bir hata oluştu.")
+        if (err?.response?.data?.message) {
+          toast({
+            title: err.response.data.message,
+            variant: "destructive",
+          })
+        }
       }
     }
   }
@@ -172,7 +183,6 @@ export default function ProductsPage() {
                   <TableHead>Kod</TableHead>
                   <TableHead>Ürün/Hizmet</TableHead>
                   <TableHead className="hidden md:table-cell">Açıklama</TableHead>
-                  <TableHead>Fiyat</TableHead>
                   <TableHead className="text-right">İşlem</TableHead>
                 </TableRow>
               </TableHeader>
