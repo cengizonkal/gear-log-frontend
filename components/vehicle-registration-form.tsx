@@ -13,19 +13,19 @@ import { apiService } from "@/lib/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
+
+import { toast } from '@/hooks/use-toast';
 
 interface Brand {
   id: number
   name: string
-}
-
-interface Model {
-  id: number
-  name: string
-  year: number | null
-  engine_capacity: number | null
-  brand_id: number
+  models: Array<{
+    id: number
+    name: string
+    year: number | null
+    engine_capacity: number | null
+    brand_id: number
+  }>
 }
 
 interface FuelType {
@@ -77,11 +77,10 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [brands, setBrands] = useState<Brand[]>([])
-  const [models, setModels] = useState<Model[]>([])
-  const [filteredModels, setFilteredModels] = useState<Model[]>([])
+  const [models, setModels] = useState<Brand["models"]>([])
   const [fuelTypes, setFuelTypes] = useState<FuelType[]>([])
   const [selectedBrand, setSelectedBrand] = useState<string>("")
-  const { toast } = useToast()
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -114,18 +113,6 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
   }, [])
 
   useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const response = await apiService.models.getAll()
-        setModels(response.data.data)
-      } catch (err) {
-        console.error("Failed to fetch models:", err)
-      }
-    }
-    fetchModels()
-  }, [])
-
-  useEffect(() => {
     const fuelTypes = async () => {
       try {
         const response = await apiService.fuelTypes.getAll()
@@ -139,11 +126,12 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
 
   useEffect(() => {
     if (selectedBrand) {
-      setFilteredModels(models.filter((m) => m.brand_id.toString() === selectedBrand))
+      const brand = brands.find((b) => b.id.toString() === selectedBrand)
+      setModels(brand?.models || [])
     } else {
-      setFilteredModels([])
+      setModels([])
     }
-  }, [selectedBrand, models])
+  }, [selectedBrand, brands])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
@@ -262,7 +250,7 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {filteredModels.map((model) => (
+                      {models.map((model) => (
                         <SelectItem key={model.id} value={model.id.toString()}>
                           {model.name} {model.year ? `(${model.year})` : ""}
                         </SelectItem>
