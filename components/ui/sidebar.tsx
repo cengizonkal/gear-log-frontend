@@ -12,6 +12,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { usePathname } from "next/navigation"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -152,6 +153,9 @@ export function SidebarFooter({ className, children, ...props }: React.HTMLAttri
 
 export function SidebarTrigger({ className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     const { toggleSidebar } = useSidebar()
+    const pathname = usePathname()
+
+    if (pathname === "/login") return null // Don't show trigger on login page
 
     return (
         <Button variant="outline" size="icon" className={cn("z-40", className)} onClick={toggleSidebar} {...props}>
