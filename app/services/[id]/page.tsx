@@ -17,6 +17,7 @@ import {
   CalendarIcon,
   CheckCircle,
   Pencil,
+  Download,
   Check,
   Newspaper,
   Clock, RotateCw, Settings, X
@@ -131,6 +132,31 @@ export default function ServiceDetailPage() {
     fetchServiceDetails()
     fetchStatuses()
   }, [params.id])
+
+  const handleDownload = async () => {
+    try {
+      const serviceId = Number(params.id);
+      const response = await apiService.services.getById(serviceId); // Fetch service details to get the license plate
+      const service = response.data.data;
+
+      const downloadResponse = await apiService.services.download(serviceId);
+
+      const blob = new Blob([downloadResponse.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${service.vehicle.license_plate}-servis.pdf`; // Use the license plate in the file name
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url); // Cleanup
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("Dosya indirilemedi.");
+    }
+  };
 
   const handleEditClick = () => {
     if (isEditing) {
@@ -275,14 +301,18 @@ export default function ServiceDetailPage() {
           </Button>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Servis #{service?.id}</h2>
         </div>
-        <Badge className={statusMap[service.status.name as keyof typeof statusMap]?.color || "bg-gray-100 text-gray-700"}>
-          {statusMap[service.status.name as keyof typeof statusMap]?.icon && (
-              React.createElement(statusMap[service.status.name as keyof typeof statusMap].icon, {
-                className: "w-4 h-4 inline-block mr-1",
-              })
-          )}
-          {service.status.name}
-        </Badge>
+        <Button size="sm" onClick={handleDownload}>
+          <span className="hidden sm:inline">İndir</span>
+          <Download className="h-4 w-4 ml-1" />
+        </Button>
+        {/*<Badge className={statusMap[service.status.name as keyof typeof statusMap]?.color || "bg-gray-100 text-gray-700"}>*/}
+        {/*  {statusMap[service.status.name as keyof typeof statusMap]?.icon && (*/}
+        {/*      React.createElement(statusMap[service.status.name as keyof typeof statusMap].icon, {*/}
+        {/*        className: "w-4 h-4 inline-block mr-1",*/}
+        {/*      })*/}
+        {/*  )}*/}
+        {/*  {service.status.name}*/}
+        {/*</Badge>*/}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

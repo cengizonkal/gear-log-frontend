@@ -109,6 +109,9 @@ export const apiService = {
 
     delete: (id: number) => api.delete(`/services/${id}`),
 
+    download: (id: number) => api.get(`/services/${id}/download`, { responseType: 'blob', }),
+
+
     // Service items
     getItems: (vehicleLicensePlate: string, serviceId: number) =>
       api.get(`/vehicles/${vehicleLicensePlate}/services/${serviceId}/items`),
