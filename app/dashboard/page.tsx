@@ -63,7 +63,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
         <Button asChild size="sm" className="self-start sm:self-auto">
-          <Link href="/services/new">
+          <Link href="/search">
             <span className="hidden sm:inline">Yeni Servis Ekle</span>
             <span className="sm:hidden">Yeni Servis</span>
           </Link>
@@ -105,7 +105,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dashboardData
+              {dashboardData && dashboardData.totalServices > 0
                 ? Math.round((dashboardData.totalFinishedServices / dashboardData.totalServices) * 100)
                 : 0}
               %

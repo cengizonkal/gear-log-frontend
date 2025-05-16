@@ -55,10 +55,10 @@ export function AddServiceItemForm({ serviceId, vehicleLicensePlate, onSuccess }
 
   useEffect(() => {
     const fetchItems = async () => {
-      if (!user?.company?.id) return
+      if (!user?.company_id) return
 
       try {
-        const response = await apiService.companies.getItems(user.company.id)
+        const response = await apiService.companies.getItems(user.company_id)
         setItems(response.data.data)
       } catch (err) {
         console.error("Failed to fetch items:", err)

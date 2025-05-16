@@ -87,14 +87,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/settings")}>
-              <Link href="/settings">
-                <Settings className="h-5 w-5" />
-                <span>Ayarlar</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          
           {isAuthenticated && (
             <SidebarMenuItem>
               <SidebarMenuButton onClick={logout}>
