@@ -89,14 +89,14 @@ export function AppSidebar() {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive("/reports")}>
-              <Link href="/reports">
-                <FileText className="h-5 w-5" />
-                <span>Rapor</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {/*<SidebarMenuItem>*/}
+          {/*  <SidebarMenuButton asChild isActive={isActive("/reports")}>*/}
+          {/*    <Link href="/reports">*/}
+          {/*      <FileText className="h-5 w-5" />*/}
+          {/*      <span>Rapor</span>*/}
+          {/*    </Link>*/}
+          {/*  </SidebarMenuButton>*/}
+          {/*</SidebarMenuItem>*/}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
