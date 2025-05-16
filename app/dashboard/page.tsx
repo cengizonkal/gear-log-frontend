@@ -1,13 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarDays, Car, CircleDollarSign, Loader2, Wrench } from "lucide-react"
+import {CalendarDays, Car, CircleDollarSign, Loader2, Plus, Wrench} from "lucide-react"
 import { RecentServicesTable } from "@/components/recent-services-table"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { apiService } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import {AddServiceForm} from "@/components/add-service-form";
 
 interface DashboardData {
   totalServices: number
@@ -16,23 +25,45 @@ interface DashboardData {
   last3Services: any[]
 }
 
+interface ServiceProps {
+  id: number
+  vehicle: {
+    license_plate: string
+    vehicle_model: string
+    brand: string
+  }
+  user: {
+    name: string
+  }
+  started_at: string | null
+  finished_at: string | null
+  status: {
+    name: string
+    color: string
+  }
+}
+
 export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [services, setServices] = useState<ServiceProps[]>([])
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [filteredServices, setFilteredServices] = useState<ServiceProps[]>([])
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await apiService.dashboard.getStats()
+      setDashboardData(response.data)
+    } catch (err) {
+      console.error("Failed to fetch dashboard data:", err)
+      setError("Dashboard verilerini yüklerken bir hata oluştu.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await apiService.dashboard.getStats()
-        setDashboardData(response.data)
-      } catch (err) {
-        console.error("Failed to fetch dashboard data:", err)
-        setError("Dashboard verilerini yüklerken bir hata oluştu.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
 
     fetchDashboardData()
   }, [])
@@ -62,12 +93,28 @@ export default function DashboardPage() {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
-        <Button asChild size="sm" className="self-start sm:self-auto">
-          <Link href="/services/new">
-            <span className="hidden sm:inline">Yeni Servis Ekle</span>
-            <span className="sm:hidden">Yeni Servis</span>
-          </Link>
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="self-start sm:self-auto">
+              <Plus className="mr-2 h-4 w-4"/>
+              <span className="hidden sm:inline">Yeni Servis</span>
+              <span className="sm:hidden">Yeni</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[800px]">
+            <DialogHeader>
+              <DialogTitle>Yeni Servis</DialogTitle>
+              <DialogDescription>Yeni bir servis kaydı oluşturun.</DialogDescription>
+            </DialogHeader>
+            <AddServiceForm
+                onClose={() => setIsDialogOpen(false)}
+                onSuccess={() => {
+                  setIsDialogOpen(false);
+                  fetchDashboardData(); // Refresh the table
+                }}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full">
