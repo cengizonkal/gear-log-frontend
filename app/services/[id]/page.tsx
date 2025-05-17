@@ -44,6 +44,7 @@ interface ServiceItemProps {
   id: number
   name: string
   description: string | null
+  note: string | null
   quantity: string
   price: string
 }
@@ -492,6 +493,7 @@ export default function ServiceDetailPage() {
                 <TableRow>
                   <TableHead>Ürün/Hizmet</TableHead>
                   <TableHead className="hidden md:table-cell">Açıklama</TableHead>
+                  <TableHead className="hidden md:table-cell">Not</TableHead>
                   <TableHead className="text-right">Miktar</TableHead>
                   <TableHead className="text-right">Birim Fiyat</TableHead>
                   <TableHead className="text-right">Toplam</TableHead>
@@ -511,6 +513,7 @@ export default function ServiceDetailPage() {
                         <TableRow key={`${item.id}-${index}`}>
                           <TableCell className="font-medium">{item.name}</TableCell>
                           <TableCell className="hidden md:table-cell">{item.description || "-"}</TableCell>
+                          <TableCell className="hidden md:table-cell">{item.note || "-"}</TableCell>
                           <TableCell className="text-right">{item.quantity}</TableCell>
                           <TableCell className="text-right">{formatCurrency(Number.parseFloat(item.price))}</TableCell>
                           <TableCell className="text-right">{formatCurrency(itemTotal)}</TableCell>

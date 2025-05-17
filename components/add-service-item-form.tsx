@@ -22,6 +22,7 @@ const formSchema = z.object({
   price: z.string().min(1, {
     message: "Fiyat gereklidir.",
   }),
+  note: z.string().optional(),
 })
 
 interface AddServiceItemFormProps {
@@ -50,6 +51,7 @@ export function AddServiceItemForm({ serviceId, vehicleLicensePlate, onSuccess }
       item_id: "",
       quantity: "1",
       price: "",
+      note: "",
     },
   })
 
@@ -86,6 +88,7 @@ export function AddServiceItemForm({ serviceId, vehicleLicensePlate, onSuccess }
         item_id: Number.parseInt(values.item_id),
         quantity: Number.parseInt(values.quantity),
         price: Number.parseFloat(values.price),
+        note: values.note || null,
       }
 
       const response = await apiService.services.addItem(vehicleLicensePlate, serviceId, itemData)
@@ -98,6 +101,7 @@ export function AddServiceItemForm({ serviceId, vehicleLicensePlate, onSuccess }
           description: selectedItem.description,
           quantity: values.quantity,
           price: values.price,
+          note: null,
         }
         onSuccess(newItem)
       }
@@ -174,6 +178,26 @@ export function AddServiceItemForm({ serviceId, vehicleLicensePlate, onSuccess }
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="note"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Not</FormLabel>
+              <FormControl>
+                <textarea
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    rows={3}
+                    {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
