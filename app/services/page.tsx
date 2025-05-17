@@ -14,13 +14,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {Input} from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {Badge} from "@/components/ui/badge"
-import {Eye, Loader2, Plus, Search} from "lucide-react"
+import {CheckCircle, Clock, Eye, Loader2, Plus, RotateCw, Search, Settings, User, X} from "lucide-react"
 import Link from "next/link"
 import {Alert, AlertDescription} from "@/components/ui/alert"
 import {AddServiceForm} from "@/components/add-service-form"
 import {formatDate} from "@/lib/utils"
 import {apiService} from "@/lib/api"
-import { statusMap } from "@/lib/status-map";
 
 
 
@@ -47,6 +46,16 @@ interface StatusProps {
     name: string
     color: string
 }
+
+const statusMap = {
+    "Beklemede": { color: "bg-amber-500 text-white", icon: Clock },
+    "Devam Ediyor": { color: "bg-blue-500 text-white", icon: RotateCw },
+    "Tamamlandı": { color: "bg-green-500 text-white", icon: CheckCircle },
+    "Parça Bekleniyor": { color: "bg-orange-500 text-white", icon: Clock },
+    "Dış Servis": { color: "bg-gray-500 text-white", icon: Settings },
+    "Onay Bekleniyor": { color: "bg-purple-500 text-white", icon: User },
+    "İptal Edildi": { color: "bg-red-500 text-white", icon: X },
+} ;
 
 export default function ServicesPage() {
     const [services, setServices] = useState<ServiceProps[]>([])
@@ -190,9 +199,9 @@ export default function ServicesPage() {
                                 <TableRow>
                                     <TableHead>Servis No</TableHead>
                                     <TableHead>Plaka</TableHead>
-                                    <TableHead className="hidden md:table-cell">Araç</TableHead>
-                                    <TableHead className="hidden md:table-cell">Makinist</TableHead>
-                                    <TableHead className="hidden md:table-cell">Tarih</TableHead>
+                                    <TableHead className="">Araç</TableHead>
+                                    <TableHead className="">Makinist</TableHead>
+                                    <TableHead className="">Tarih</TableHead>
                                     <TableHead>Durum</TableHead>
                                     <TableHead className="text-right">İşlem</TableHead>
                                 </TableRow>
@@ -209,15 +218,14 @@ export default function ServicesPage() {
                                         <TableRow key={service.id}>
                                             <TableCell className="font-medium">#{service.id}</TableCell>
                                             <TableCell>{service.vehicle.license_plate.toUpperCase()}</TableCell>
-                                            <TableCell className="hidden md:table-cell">
+                                            <TableCell className="">
                                                 {service.vehicle.brand} {service.vehicle.vehicle_model}
                                             </TableCell>
-                                            <TableCell className="hidden md:table-cell">{service.user.name}</TableCell>
-                                            <TableCell className="hidden md:table-cell">
+                                            <TableCell className="">{service.user.name}</TableCell>
+                                            <TableCell className="">
                                                 {formatDate(service.started_at)}
                                             </TableCell>
-
-                                            <TableCell className="hidden md:table-cell">
+                                            <TableCell className="">
                                                 <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
                                                     {statusMap[service.status.name]?.icon && (
                                                         React.createElement(statusMap[service.status.name].icon, {

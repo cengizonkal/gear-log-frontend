@@ -124,24 +124,38 @@ export default function ProductsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Ürünler ve Hizmetler</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="self-start sm:self-auto">
-              <Plus className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Yeni Ürün/Hizmet Ekle</span>
-              <span className="sm:hidden">Yeni Ekle</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>{selectedItem ? "Ürün/Hizmet Düzenle" : "Yeni Ürün/Hizmet Ekle"}</DialogTitle>
-              <DialogDescription>
-                {selectedItem ? "Ürün veya hizmet bilgilerini güncelleyin." : "Yeni bir ürün veya hizmet ekleyin."}
-              </DialogDescription>
-            </DialogHeader>
-            <ProductForm initialData={selectedItem} onSuccess={selectedItem ? handleUpdateItem : handleAddItem} />
-          </DialogContent>
-        </Dialog>
-      </div>
+        <Button
+            size="sm"
+            className="self-start sm:self-auto"
+            onClick={() => {
+              setSelectedItem(null)
+              setIsDialogOpen(true)
+            }}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Yeni Ürün/Hizmet Ekle</span>
+          <span className="sm:hidden">Yeni Ekle</span>
+        </Button>
+
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedItem ? "Ürün/Hizmet Düzenle" : "Yeni Ürün/Hizmet Ekle"}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedItem
+                  ? "Ürün veya hizmet bilgilerini güncelleyin."
+                  : "Yeni bir ürün veya hizmet ekleyin."}
+            </DialogDescription>
+          </DialogHeader>
+          <ProductForm
+              initialData={selectedItem}
+              onSuccess={selectedItem ? handleUpdateItem : handleAddItem}
+          />
+        </DialogContent>
+      </Dialog>
+
+    </div>
 
       {error && (
         <Alert variant="destructive">
@@ -172,7 +186,6 @@ export default function ProductsPage() {
                   <TableHead>Kod</TableHead>
                   <TableHead>Ürün/Hizmet</TableHead>
                   <TableHead className="hidden md:table-cell">Açıklama</TableHead>
-                  <TableHead>Fiyat</TableHead>
                   <TableHead className="text-right">İşlem</TableHead>
                 </TableRow>
               </TableHeader>
@@ -189,7 +202,6 @@ export default function ProductsPage() {
                       <TableCell className="font-medium">#{item.id}</TableCell>
                       <TableCell>{item.name}</TableCell>
                       <TableCell className="hidden md:table-cell">{item.description || "-"}</TableCell>
-                      
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleEditItem(item)}>

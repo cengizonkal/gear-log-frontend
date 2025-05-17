@@ -12,6 +12,8 @@ import { useState } from "react"
 import { apiService } from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
 import { Loader2 } from "lucide-react"
+import { useEffect } from "react"
+
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -42,12 +44,20 @@ export function ProductForm({ initialData, onSuccess }: ProductFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: initialData?.name || "",
-      description: initialData?.description || "",
-      
-      type: initialData?.description?.includes("Hizmet") ? "service" : "product",
+      name: "",
+      description: "",
+      type: "product",
     },
   })
+
+  useEffect(() => {
+    form.reset({
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      type: initialData?.description?.includes("Hizmet") ? "service" : "product",
+    })
+  }, [initialData, form.reset])
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user?.company?.id) {

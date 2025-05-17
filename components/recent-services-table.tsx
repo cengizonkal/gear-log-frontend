@@ -3,10 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import { Eye } from "lucide-react"
+import {CheckCircle, Clock, Eye, RotateCw, Settings, User, X} from "lucide-react"
 import React from "react";
-import { statusMap } from "@/lib/status-map";
-
 
 interface ServiceProps {
   id: number
@@ -24,6 +22,16 @@ interface ServiceProps {
   created_at: string | null
   updated_at: string | null
 }
+
+const statusMap = {
+  "Beklemede": { color: "bg-amber-500 text-white", icon: Clock },
+  "Devam Ediyor": { color: "bg-blue-500 text-white", icon: RotateCw },
+  "Tamamlandı": { color: "bg-green-500 text-white", icon: CheckCircle },
+  "Parça Bekleniyor": { color: "bg-orange-500 text-white", icon: Clock },
+  "Dış Servis": { color: "bg-gray-500 text-white", icon: Settings },
+  "Onay Bekleniyor": { color: "bg-purple-500 text-white", icon: User },
+  "İptal Edildi": { color: "bg-red-500 text-white", icon: X },
+} ;
 
 export function RecentServicesTable({ services }: { services: ServiceProps[] }) {
   if (!services || services.length === 0) {
@@ -53,7 +61,7 @@ export function RecentServicesTable({ services }: { services: ServiceProps[] }) 
               </TableCell>
               <TableCell className="hidden md:table-cell">{formatDate(service.started_at)}</TableCell>
               <TableCell>
-                <Badge className={statusMap[service.status.name as keyof typeof statusMap]?.color || "bg-gray-100 text-gray-700"}>
+                <Badge className={`whitespace-nowrap text-sm px-2 ${statusMap[service.status.name as keyof typeof statusMap]?.color || "bg-gray-100 text-gray-700"}`}>
                   {statusMap[service.status.name as keyof typeof statusMap]?.icon && (
                       React.createElement(statusMap[service.status.name as keyof typeof statusMap].icon, {
                         className: "w-4 h-4 inline-block mr-1",
@@ -61,6 +69,7 @@ export function RecentServicesTable({ services }: { services: ServiceProps[] }) 
                   )}
                   {service.status.name}
                 </Badge>
+
               </TableCell>
               <TableCell className="text-right">
                 <Button variant="ghost" size="icon" asChild>

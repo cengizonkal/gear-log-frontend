@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Plus, Loader2 } from 'lucide-react';
+import {Eye, Plus, Loader2, Clock, RotateCw, CheckCircle, Settings, User, X} from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from "@/components/ui/label"
@@ -22,7 +22,6 @@ import { NewServiceForm } from "@/components/new-service-form";
 import Link from 'next/link';
 import { OwnerDetails } from '@/components/owner-details';
 import { VehicleDetails } from '@/components/vehicle-details';
-import {statusMap} from "@/lib/status-map";
 
 interface ServiceProps {
   id: number;
@@ -59,6 +58,16 @@ interface VehicleProps {
 interface Props {
   params: { license_plate: string };
 }
+
+const statusMap = {
+  "Beklemede": { color: "bg-amber-500 text-white", icon: Clock },
+  "Devam Ediyor": { color: "bg-blue-500 text-white", icon: RotateCw },
+  "Tamamlandı": { color: "bg-green-500 text-white", icon: CheckCircle },
+  "Parça Bekleniyor": { color: "bg-orange-500 text-white", icon: Clock },
+  "Dış Servis": { color: "bg-gray-500 text-white", icon: Settings },
+  "Onay Bekleniyor": { color: "bg-purple-500 text-white", icon: User },
+  "İptal Edildi": { color: "bg-red-500 text-white", icon: X },
+} ;
 
 export default function VehicleDetailPage({ params }: Props) {
   const { license_plate } = React.use(params);
