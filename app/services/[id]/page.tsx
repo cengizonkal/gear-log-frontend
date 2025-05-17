@@ -37,7 +37,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { AddServiceItemForm } from "@/components/add-service-item-form"
-
+import { useToast } from "@/hooks/use-toast"
 
 
 interface ServiceItemProps {
@@ -167,6 +167,8 @@ export default function ServiceDetailPage() {
     }
   };
 
+  const { toast } = useToast()
+
   const handleEditClick = () => {
     if (isEditing) {
       // Save changes
@@ -180,8 +182,6 @@ export default function ServiceDetailPage() {
 
       apiService.services.update(serviceId, updatedServiceData)
         .then(response => {
-          console.log("Service updated:", response.data);
-          // Update the service state with the new data
           const selectedStatus = status.find(
               (s) => s.id === Number(updatedServiceData.status_id)
           );
@@ -197,8 +197,14 @@ export default function ServiceDetailPage() {
               status: selectedStatus || prevService.status,
             };
           });
+
+          toast({
+            title: "Başarılı",
+            description: "Servis başarıyla güncellendi.",
+            variant: "default",
+          });
         })
-        .catch(error => {
+          .catch(error => {
           console.error("Failed to update service:", error);
           setError("Servis güncellenirken bir hata oluştu.");
         })
@@ -415,7 +421,6 @@ export default function ServiceDetailPage() {
                 )}
               </div>
             </div>
-            {/* Kaydet butonu */}
             {isUserAuthorized && (
               <div className="flex justify-end">
                 <Button onClick={handleEditClick} variant="default">
