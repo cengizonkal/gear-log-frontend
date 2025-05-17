@@ -14,6 +14,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
+import { toast } from '@/hooks/use-toast';
+
 interface Brand {
   id: number
   name: string
@@ -22,6 +24,7 @@ interface Brand {
     name: string
     year: number | null
     engine_capacity: number | null
+    brand_id: number
   }>
 }
 
@@ -41,15 +44,16 @@ const formSchema = z.object({
   model: z.string({
     required_error: "Lütfen model seçiniz.",
   }),
-  mileage: z.string().min(1, {
-    message: "Kilometre bilgisi gereklidir.",
-  }),
+  
   fuelType: z.string({
     required_error: "Lütfen yakıt tipini seçiniz.",
   }),
-  vin: z.string().min(1, {
-    message: "VIN numarası gereklidir.",
-  }),
+  
+  vin: z.string().optional().or(z.literal("")),
+  year: z.string().optional().or(z.literal("")),
+  engineCapacity: z.string().optional().or(z.literal("")),
+  weight: z.string().optional().or(z.literal("")),
+  mileage: z.string().optional().or(z.literal("")),
 
   // Araç sahibi bilgileri
   ownerName: z.string().min(2, {
@@ -73,9 +77,10 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [brands, setBrands] = useState<Brand[]>([])
+  const [models, setModels] = useState<Brand["models"]>([])
   const [fuelTypes, setFuelTypes] = useState<FuelType[]>([])
   const [selectedBrand, setSelectedBrand] = useState<string>("")
-  const [models, setModels] = useState<Brand["models"]>([])
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,6 +91,9 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
       mileage: "",
       fuelType: "",
       vin: "",
+      year: "",
+      engineCapacity: "",
+      weight: "",
       ownerName: "",
       ownerPhone: "",
       ownerEmail: "",
@@ -101,7 +109,6 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
         console.error("Failed to fetch brands:", err)
       }
     }
-
     fetchBrands()
   }, [])
 
@@ -132,29 +139,38 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
     setSuccess(null)
 
     try {
-      // First create the owner
-      const ownerData = {
-        name: values.ownerName,
-        phone: values.ownerPhone,
-        email: values.ownerEmail || null,
+      // Prepare the payload for the backend
+      const payload = {
+        owner: {
+          name: values.ownerName,
+          phone: values.ownerPhone,
+          email: values.ownerEmail || null,
+        },
+        vehicle: {
+          license_plate: values.licensePlate,
+          mileage: values.mileage ? parseInt(values.mileage, 10) : null,
+          fuel_type_id: values.fuelType, // should be ID, ensure Select uses ID
+          vin: values.vin,
+          vehicle_model_id: values.model, // should be ID
+          year: values.year ? parseInt(values.year, 10) : undefined,
+          engine_capacity: values.engineCapacity ? parseInt(values.engineCapacity, 10) : undefined,
+          weight: values.weight ? parseInt(values.weight, 10) : undefined,
+        },
       }
 
-      const ownerResponse = await apiService.owners.create(ownerData)
-      const ownerId = ownerResponse.data.data.id
-
-      // Then create the vehicle with the owner ID
-      // Note: The API spec doesn't show a direct endpoint for creating vehicles
-      // This would need to be implemented on the backend
-
-      setSuccess("Araç başarıyla kaydedildi!")
+      const response = await apiService.vehiclesWithOwner.create(payload)
+      const message = response.data?.message || "Araç ve sahibi başarıyla kaydedildi!"
+      toast({ description: message, variant: "default" })
+      setSuccess(message)
 
       // Redirect to the vehicle details page after a short delay
       setTimeout(() => {
         router.push(`/vehicles/${values.licensePlate}`)
       }, 1500)
     } catch (err: any) {
-      console.error("Registration error:", err)
-      setError(err.response?.data?.message || "Araç kaydı sırasında bir hata oluştu.")
+      const errorMsg = err.response?.data?.message || "Araç kaydı sırasında bir hata oluştu."
+      toast({ description: errorMsg, variant: "destructive" })
+      setError(errorMsg)
     } finally {
       setIsLoading(false)
     }
@@ -272,10 +288,10 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
                     </FormControl>
                     <SelectContent>
                       {fuelTypes.map((fuelType) => (
-                      <SelectItem key={fuelType.id} value={fuelType.name}>
-                      {fuelType.name}
-                      </SelectItem>
-                    ))}
+                        <SelectItem key={fuelType.id} value={fuelType.id.toString()}>
+                          {fuelType.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -290,6 +306,45 @@ export function VehicleRegistrationForm({ initialLicensePlate = "" }: { initialL
                   <FormLabel>VIN</FormLabel>
                   <FormControl>
                     <Input placeholder="1HGCM82633A123456" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="year"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Yıl</FormLabel>
+                  <FormControl>
+                    <Input placeholder="2020" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="engineCapacity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Motor Hacmi (cc)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="1600" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="weight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ağırlık (kg)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="1200" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

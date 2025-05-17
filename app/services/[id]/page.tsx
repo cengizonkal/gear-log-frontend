@@ -99,7 +99,7 @@ export default function ServiceDetailPage() {
   const [editedServiceData, setEditedServiceData] = useState<Partial<ServiceDetailsProps>>({});
 
   const { user } = useAuth()
-  const loggedInUserCompanyId = user?.company?.id
+  const loggedInUserCompanyId = user?.company_id
 
     useEffect(() => {
     const fetchServiceDetails = async () => {

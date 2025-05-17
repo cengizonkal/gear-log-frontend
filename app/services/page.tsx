@@ -2,14 +2,7 @@
 
 import React, {useState, useEffect} from "react"
 import {Button} from "@/components/ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger
-} from "@/components/ui/dialog"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -17,12 +10,9 @@ import {Badge} from "@/components/ui/badge"
 import {Eye, Loader2, Plus, Search} from "lucide-react"
 import Link from "next/link"
 import {Alert, AlertDescription} from "@/components/ui/alert"
-import {AddServiceForm} from "@/components/add-service-form"
 import {formatDate} from "@/lib/utils"
 import {apiService} from "@/lib/api"
 import { statusMap } from "@/lib/status-map";
-
-
 
 interface ServiceProps {
     id: number
@@ -55,7 +45,6 @@ export default function ServicesPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     const fetchServices = async () => {
         try {
@@ -72,8 +61,6 @@ export default function ServicesPage() {
     }
 
     useEffect(() => {
-
-
         const fetchStatuses = async () => {
             try {
                 setIsLoading(true)
@@ -88,7 +75,6 @@ export default function ServicesPage() {
         fetchServices()
         fetchStatuses()
     }, [])
-
 
     useEffect(() => {
         if (searchQuery.trim() === "") {
@@ -127,29 +113,13 @@ export default function ServicesPage() {
         <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Servisler</h2>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button size="sm" className="self-start sm:self-auto">
-                            <Plus className="mr-2 h-4 w-4"/>
-                            <span className="hidden sm:inline">Yeni Servis</span>
-                            <span className="sm:hidden">Yeni</span>
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[800px]">
-                        <DialogHeader>
-                            <DialogTitle>Yeni Servis</DialogTitle>
-                            <DialogDescription>Yeni bir servis kaydı oluşturun.</DialogDescription>
-                        </DialogHeader>
-                        <AddServiceForm
-                            onClose={() => setIsDialogOpen(false)}
-                            onSuccess={() => {
-                                setIsDialogOpen(false);
-                                fetchServices(); // Refresh the table
-                            }}
-                        />
-                    </DialogContent>
-                </Dialog>
-
+                <Button size="sm" className="self-start sm:self-auto" asChild>
+                    <Link href="/search">
+                        <Plus className="mr-2 h-4 w-4"/>
+                        <span className="hidden sm:inline">Yeni Servis</span>
+                        <span className="sm:hidden">Yeni</span>
+                    </Link>
+                </Button>
             </div>
 
             {error && (
@@ -218,14 +188,20 @@ export default function ServicesPage() {
                                             </TableCell>
 
                                             <TableCell className="hidden md:table-cell">
-                                                <Badge className={statusMap[service.status.name]?.color || "bg-gray-100 text-gray-700"}>
-                                                    {statusMap[service.status.name]?.icon && (
-                                                        React.createElement(statusMap[service.status.name].icon, {
-                                                            className: "w-4 h-4 inline-block mr-1",
-                                                        })
-                                                    )}
-                                                    {service.status.name}
-                                                </Badge>
+                                                {(() => {
+                                                    const statusKey = service.status.name as keyof typeof statusMap;
+                                                    const status = statusMap[statusKey];
+                                                    return (
+                                                        <Badge className={status?.color || "bg-gray-100 text-gray-700"}>
+                                                            {status?.icon && (
+                                                                React.createElement(status.icon, {
+                                                                    className: "w-4 h-4 inline-block mr-1",
+                                                                })
+                                                            )}
+                                                            {service.status.name}
+                                                        </Badge>
+                                                    );
+                                                })()}
                                             </TableCell>
 
                                             <TableCell className="text-right">

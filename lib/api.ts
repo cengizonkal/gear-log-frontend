@@ -68,6 +68,7 @@ export const apiService = {
   // Vehicle related API calls
   vehicles: {
     // search: (licensePlate: string) => api.get(`/vehicles/${licensePlate}`),
+    create: (vehicleData: any) => api.post("/vehicles", vehicleData),
 
     search: (query: string) => api.get(`/vehicles/search/${query}`),
 
@@ -82,6 +83,11 @@ export const apiService = {
     addService: (licensePlate: string, serviceData: any) => api.post(`/vehicles/${licensePlate}/services`, serviceData),
 
     update: (licensePlate: string, vehicleData: any) => api.put(`/vehicles/${licensePlate}`, vehicleData),
+  },
+
+  // Vehicles with Owner related API calls
+  vehiclesWithOwner: {
+    create: (data: any) => api.post("/vehicles-with-owner", data),
   },
 
   // Owner related API calls
@@ -166,5 +172,10 @@ export const apiService = {
     update: (id: number, userData: any) => api.put(`/users/${id}`, userData),
 
     delete: (id: number) => api.delete(`/users/${id}`),
+  },
+
+  // Vehicle model related API calls
+  models: {
+    getAll: () => api.get("/vehicle-models"),
   },
 }

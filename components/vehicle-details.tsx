@@ -1,20 +1,31 @@
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { apiService } from '@/lib/api';
-import { toast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { apiService } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 interface VehicleDetailsProps {
   vehicle: any;
   onVehicleUpdate: (vehicle: any) => void;
 }
 
-export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps) {
+export function VehicleDetails({
+  vehicle,
+  onVehicleUpdate,
+}: VehicleDetailsProps) {
   const [mileage, setMileage] = useState(vehicle.mileage || "");
   const [vin, setVin] = useState(vehicle.vin || "");
   const [year, setYear] = useState(vehicle.year || "");
-  const [engineCapacity, setEngineCapacity] = useState(vehicle.engine_capacity || "");
+  const [engineCapacity, setEngineCapacity] = useState(
+    vehicle.engine_capacity || ""
+  );
   const [weight, setWeight] = useState(vehicle.weight || "");
   const [brands, setBrands] = useState([]);
   const [fuelTypes, setFuelTypes] = useState([]);
@@ -30,18 +41,26 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
     setYear(vehicle.year || "");
     setEngineCapacity(vehicle.engine_capacity || "");
     setWeight(vehicle.weight || "");
-  }, [vehicle.mileage, vehicle.vin, vehicle.year, vehicle.engine_capacity, vehicle.weight]);
+  }, [
+    vehicle.mileage,
+    vehicle.vin,
+    vehicle.year,
+    vehicle.engine_capacity,
+    vehicle.weight,
+  ]);
 
   useEffect(() => {
     const fetchBrands = async () => {
       try {
         const response = await apiService.brands.getAll();
         setBrands(response.data.data);
-        const brand = response.data.data.find(b => b.name === vehicle.brand);
+        const brand = response.data.data.find((b) => b.name === vehicle.brand);
         if (brand) {
           setSelectedBrand(brand.id.toString());
           setModels(brand.models);
-          const model = brand.models.find(m => m.name === vehicle.vehicle_model);
+          const model = brand.models.find(
+            (m) => m.name === vehicle.vehicle_model
+          );
           if (model) setSelectedModel(model.id.toString());
         }
       } catch (err) {
@@ -56,7 +75,9 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
       try {
         const response = await apiService.fuelTypes.getAll();
         setFuelTypes(response.data.data);
-        const fuel = response.data.data.find(f => f.name === vehicle.fuel_type);
+        const fuel = response.data.data.find(
+          (f) => f.name === vehicle.fuel_type
+        );
         if (fuel) setSelectedFuelType(fuel.name);
       } catch (err) {
         // handle error
@@ -67,9 +88,13 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
 
   useEffect(() => {
     if (selectedBrand) {
-      const brand = brands.find(b => b.id.toString() === selectedBrand);
+      const brand = brands.find((b) => b.id.toString() === selectedBrand);
       setModels(brand?.models || []);
-      if (brand && brand.models.length > 0 && !brand.models.find(m => m.id.toString() === selectedModel)) {
+      if (
+        brand &&
+        brand.models.length > 0 &&
+        !brand.models.find((m) => m.id.toString() === selectedModel)
+      ) {
         setSelectedModel("");
       }
     } else {
@@ -94,12 +119,24 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
         ...vehicle,
         ...response.data.data,
         fuel_type: selectedFuelType,
-        vehicle_model: models.find(m => m.id.toString() === selectedModel)?.name || vehicle.vehicle_model,
-        brand: brands.find(b => b.id.toString() === selectedBrand)?.name || vehicle.brand,
+        vehicle_model:
+          models.find((m) => m.id.toString() === selectedModel)?.name ||
+          vehicle.vehicle_model,
+        brand:
+          brands.find((b) => b.id.toString() === selectedBrand)?.name ||
+          vehicle.brand,
       });
-      toast({ title: "Kaydedildi", description: "Araç bilgileri başarıyla kaydedildi." });
+      toast({
+        title: "Kaydedildi",
+        description: response.data.message,
+        variant: "default",
+      });
     } catch (error) {
-      // handle error
+      toast({
+        title: "Hata",
+        description: "Aracı kaydederken bir hata oluştu.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -117,7 +154,9 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
             </SelectTrigger>
             <SelectContent>
               {brands.map((brand: any) => (
-                <SelectItem key={brand.id} value={brand.id.toString()}>{brand.name}</SelectItem>
+                <SelectItem key={brand.id} value={brand.id.toString()}>
+                  {brand.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -130,7 +169,9 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
             </SelectTrigger>
             <SelectContent>
               {models.map((model: any) => (
-                <SelectItem key={model.id} value={model.id.toString()}>{model.name}</SelectItem>
+                <SelectItem key={model.id} value={model.id.toString()}>
+                  {model.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -143,34 +184,65 @@ export function VehicleDetails({ vehicle, onVehicleUpdate }: VehicleDetailsProps
             </SelectTrigger>
             <SelectContent>
               {fuelTypes.map((fuel: any) => (
-                <SelectItem key={fuel.id} value={fuel.name}>{fuel.name}</SelectItem>
+                <SelectItem key={fuel.id} value={fuel.name}>
+                  {fuel.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-600">Kilometre:</span>
-          <Input type="text" value={mileage} onChange={e => setMileage(e.target.value)} className="w-2/3" />
+          <Input
+            type="text"
+            value={mileage}
+            onChange={(e) => setMileage(e.target.value)}
+            className="w-2/3"
+          />
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-600">VIN:</span>
-          <Input type="text" value={vin} onChange={e => setVin(e.target.value)} className="w-2/3" />
+          <Input
+            type="text"
+            value={vin}
+            onChange={(e) => setVin(e.target.value)}
+            className="w-2/3"
+          />
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-600">Yıl:</span>
-          <Input type="number" value={year} onChange={e => setYear(e.target.value)} className="w-2/3" />
+          <Input
+            type="number"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            className="w-2/3"
+          />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600">Motor Hacmi (cc):</span>
-          <Input type="number" value={engineCapacity} onChange={e => setEngineCapacity(e.target.value)} className="w-2/3" />
+          <span className="text-sm font-medium text-gray-600">
+            Motor Hacmi (cc):
+          </span>
+          <Input
+            type="number"
+            value={engineCapacity}
+            onChange={(e) => setEngineCapacity(e.target.value)}
+            className="w-2/3"
+          />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600">Ağırlık (kg):</span>
-          <Input type="number" value={weight} onChange={e => setWeight(e.target.value)} className="w-2/3" />
+          <span className="text-sm font-medium text-gray-600">
+            Ağırlık (kg):
+          </span>
+          <Input
+            type="number"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            className="w-2/3"
+          />
         </div>
       </div>
       <Button onClick={handleSave} className="mt-6 w-full" disabled={loading}>
-        {loading ? 'Kaydediliyor...' : 'Kaydet'}
+        {loading ? "Kaydediliyor..." : "Kaydet"}
       </Button>
     </div>
   );

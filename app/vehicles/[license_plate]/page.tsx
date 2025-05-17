@@ -8,8 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Eye, Plus, Loader2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
